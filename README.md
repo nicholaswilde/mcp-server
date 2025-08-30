@@ -97,6 +97,20 @@ Add the following to your `settings.json` file:
 }
 ```
 
+### Using the `mcp` tool
+
+Once the `mcp-server` is configured in `gemini-cli`, you can use the `mcp` tool to interact with the server. For example, to list all available agent instructions:
+
+```bash
+gemini mcp list_agents_instructions
+```
+
+To retrieve a specific agent instruction file:
+
+```bash
+gemini mcp get_agents_instructions --file_name dev_rules.agents.md
+```
+
 See [reference][1].
 
 ## :balance_scale: License
