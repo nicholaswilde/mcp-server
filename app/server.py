@@ -1,0 +1,165 @@
+import os
+import uvicorn
+import subprocess
+import asyncio
+import yaml
+from pathlib import Path
+from typing import Dict, AsyncIterator
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from mcp.server import FastMCP
+from mcp.server.fastmcp.resources import FunctionResource
+from mcp.server.fastmcp.exceptions import ToolError
+
+# Configuration
+def load_config():
+    with open("config.yaml", "r") as f:
+        return yaml.safe_load(f)
+
+config = load_config()
+SERVER_PORT = int(os.environ.get("SERVER_PORT", config["server"]["port"]))
+AGENTS_LIBRARY_PATH = Path(os.environ.get("AGENTS_LIBRARY_PATH", config["server"]["agents_library_path"]))
+
+# Initialize the FastAPI app and the MCP server
+mcp_server = FastMCP(
+    name=config["mcp_server"]["name"],
+    streamable_http_path=config["mcp_server"]["streamable_http_path"],
+    json_response=config["mcp_server"]["json_response"],
+)
+
+# A dictionary to store the contents of our AGENTS.md files
+agents_data: Dict[str, str] = {}
+
+async def load_agents_data(agents_library_path: Path):
+    """Loads all AGENTS.md files into memory."""
+    if not agents_library_path.is_dir():
+        print(f"Directory not found: {agents_library_path}")
+        return
+
+    for file_path in agents_library_path.glob("*.agents.md"):
+        try:
+            content = file_path.read_text(encoding="utf-8")
+            # Use the filename (without extension) as the tool name
+            tool_name = file_path.stem.replace(".agents", "")
+            agents_data[tool_name] = content
+            print(f"Loaded AGENTS.md file: {file_path.name} as tool '{tool_name}'")
+        except Exception as e:
+            print(f"Error loading {file_path}: {e}")
+
+async def load_bash_scripts(agents_library_path: Path):
+    """Loads all .sh files as resources."""
+    if not agents_library_path.is_dir():
+        print(f"Directory not found: {agents_library_path}")
+        return
+
+    def create_run_script_callable(script_path: Path):
+        async def _run_script():
+            process = await asyncio.create_subprocess_exec(
+                "bash", str(script_path),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            stdout, stderr = await process.communicate()
+            if process.returncode != 0:
+                print(f"Error running script {script_path.name}: {stderr.decode().strip()}")
+                raise HTTPException(status_code=500, detail=f"Script execution failed: {stderr.decode().strip()}")
+            return stdout.decode().strip()
+        return _run_script
+
+    for file_path in agents_library_path.glob("*.sh"):
+        try:
+            script_name = file_path.stem
+            resource_uri = f"resource://scripts/{script_name}"
+
+            mcp_server.add_resource(
+                FunctionResource(
+                    fn=create_run_script_callable(file_path),
+                    uri=resource_uri,
+                    name=script_name,
+                    description=f"Executes the {script_name}.sh script and returns its output.",
+                    mime_type="text/plain"
+                )
+            )
+            print(f"Loaded bash script: {file_path.name} as resource '{resource_uri}'")
+        except Exception as e:
+            print(f"Error loading {file_path}: {e}")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    """
+    Context manager for managing the lifespan of the FastAPI application.
+    Handles startup and shutdown events.
+    """
+    # Get AGENTS_LIBRARY_PATH from environment variable during lifespan startup
+    agents_library_path = Path(os.environ.get("AGENTS_LIBRARY_PATH", "/app/agents-library"))
+    await load_agents_data(agents_library_path)
+    await load_bash_scripts(agents_library_path)
+    mcp_app = mcp_server.streamable_http_app()
+    async with mcp_server.session_manager.run():
+        app.mount("/", mcp_app)
+        print("MCP server started and ready to serve.")
+        yield
+    # Clean up / shutdown events can go here if needed
+
+app = FastAPI(lifespan=lifespan)
+
+@app.exception_handler(ToolError)
+async def tool_error_handler(request: Request, exc: ToolError):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": f"Tool execution failed: {exc}"
+        },
+    )
+
+class ToolCallRequest(BaseModel):
+    tool_name: str
+    args: Dict
+
+class ResourceReadRequest(BaseModel):
+    uri: str
+
+# Temporary test endpoints for direct tool/resource invocation
+@app.post("/test/call_tool")
+async def test_call_tool(request: ToolCallRequest):
+    return await mcp_server.call_tool(request.tool_name, request.args)
+
+@app.post("/test/read_resource")
+async def test_read_resource(request: ResourceReadRequest):
+    # The read_resource returns an Iterable[ReadResourceContents]
+    # For testing, we'll just get the first item's content
+    contents = await mcp_server.read_resource(request.uri)
+    if contents:
+        # Assuming content is text for simplicity in testing
+        return {"content": contents[0].content, "mime_type": contents[0].mime_type}
+    raise HTTPException(status_code=404, detail="Resource content not found.")
+
+@mcp_server.tool(
+    name="get_agents_instructions",
+    description="Retrieves a specific AGENTS.md file for providing AI with instructions and context."
+)
+async def get_agents_instructions(name: str) -> Dict[str, str]:
+    """
+    Handler to return the content of a requested AGENTS.md file.
+    """
+    if name in agents_data:
+        return {
+            "content": agents_data[name],
+            "content_type": "text/markdown"
+        }
+    raise HTTPException(status_code=404, detail=f"AGENTS.md file '{name}' not found.")
+
+@mcp_server.tool(
+    name="list_agents_instructions",
+    description="Lists all available AGENTS.md files."
+)
+async def list_agents_instructions() -> Dict[str, list]:
+    """
+    Handler to list all available AGENTS.md files.
+    """
+    return {"files": list(agents_data.keys())}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=SERVER_PORT)

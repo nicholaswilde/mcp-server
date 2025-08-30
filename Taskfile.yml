@@ -1,0 +1,46 @@
+version: '3'
+
+tasks:
+  install:
+    desc: "Install Python dependencies"
+    cmds:
+      - |
+        source venv/bin/activate && pip install -r requirements.txt
+
+  run:
+    desc: "Run the FastAPI server"
+    cmds:
+      - |
+        AGENTS_LIBRARY_PATH=/home/nicholas/git/nicholaswilde/mcp-server/agents-library uvicorn app.server:app --host 0.0.0.0 --port 8080 --reload
+        # /home/nicholas/git/nicholaswilde/mcp-server/venv/bin/python -m uvicorn app.server:app --host 0.0.0.0 --port 8080 --reload
+        
+  lint:
+    desc: "Run linting checks"
+    cmds:
+      - echo "No linting configured yet." # TODO: Add actual linting command (e.g., ruff, flake8)
+
+  docker-build:
+    desc: "Build the Docker image"
+    cmds:
+      - docker build -t nicholaswilde/mcp-server . --load
+
+  docker-run:
+    desc: "Run the Docker container"
+    cmds:
+      - docker run -p 8080:8080 -e AGENTS_LIBRARY_PATH=/app/agents-library nicholaswilde/mcp-server
+
+  docker-build-and-load:
+    desc: "Build and load the Docker image"
+    cmds:
+      - task: docker-build
+      - task: docker-run
+
+  test:
+    desc: "Run Python unit tests"
+    cmds:
+      - |
+        source venv/bin/activate && PYTHONPATH=. pytest tests/test_server.py
+  default:
+    cmds:
+      - task -l
+    silent: true

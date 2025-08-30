@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  mcp-server:
+    image: nicholaswilde/mcp-server
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./agents-library:/app/agents-library
+    environment:
+      - AGENTS_LIBRARY_PATH=/app/agents-library
+    restart: unless-stopped

@@ -1,0 +1,8 @@
+server:
+  port: 8080
+  agents_library_path: /app/agents-library
+
+mcp_server:
+  name: mcp-server
+  streamable_http_path: /
+  json_response: true
