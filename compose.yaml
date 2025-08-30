@@ -2,7 +2,11 @@ version: '3.8'
 
 services:
   mcp-server:
-    image: nicholaswilde/mcp-server
+    build:
+      context: .
+      args:
+        VERSION: ${GIT_TAG:-latest}
+    image: nicholaswilde/mcp-server:${GIT_TAG:-latest}
     ports:
       - "8080:8080"
     volumes:

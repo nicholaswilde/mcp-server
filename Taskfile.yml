@@ -1,6 +1,28 @@
+---
 version: '3'
 
+vars:
+  VER: '2.5'
+  SOURCE: 'source venv/bin/activate'
+  
 tasks:
+  gflash:
+    desc: Run Gemini with the gemini-2.5-flash model.
+    cmds:
+      - |
+        gemini -m gemini-{{ .VER }}-flash
+  glite:
+    desc: Run Gemini with the gemini-2.5-flash-lite model.
+    cmds:
+      - |
+        {{ .SOURCE }} && gemini -m gemini-{{ .VER }}-flash-lite
+
+  gpro:
+    desc: 'Run Gemini with the gemini-{{ .VER }}-pro model.'
+    cmds:
+      - |
+        {{ .SOURCE }} && gemini -m gemini-{{ .VER }}-pro
+
   install:
     desc: "Install Python dependencies"
     cmds:
@@ -9,11 +31,12 @@ tasks:
 
   run:
     desc: "Run the FastAPI server"
+    env:
+      AGENTS_LIBRARY_PATH: "{{ .TASKFILE_DIR }}/agents-library"
     cmds:
       - |
-        AGENTS_LIBRARY_PATH=/home/nicholas/git/nicholaswilde/mcp-server/agents-library uvicorn app.server:app --host 0.0.0.0 --port 8080 --reload
-        # /home/nicholas/git/nicholaswilde/mcp-server/venv/bin/python -m uvicorn app.server:app --host 0.0.0.0 --port 8080 --reload
-        
+        {{ .TASKFILE_DIR }}/venv/bin/python -m uvicorn app.server:app --host 0.0.0.0 --port 8080 --reload
+    ignore_error: true
   lint:
     desc: "Run linting checks"
     cmds:
