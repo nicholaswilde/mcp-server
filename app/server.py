@@ -16,11 +16,33 @@ from mcp.server.fastmcp.exceptions import ToolError
 # Configuration
 def load_config():
     with open("config.yaml", "r") as f:
-        return yaml.safe_load(f)
+        cfg = yaml.safe_load(f)
+
+    # Override config with environment variables
+    def _override_config_with_env(current_config, prefix=""):
+        for key, value in current_config.items():
+            env_var_name = f"{prefix}{key}".upper()
+            if isinstance(value, dict):
+                _override_config_with_env(value, f"{env_var_name}_")
+            else:
+                if env_var_name in os.environ:
+                    # Attempt to convert environment variable to the same type as the config value
+                    try:
+                        if isinstance(value, int):
+                            current_config[key] = int(os.environ[env_var_name])
+                        elif isinstance(value, bool):
+                            current_config[key] = os.environ[env_var_name].lower() in ('true', '1', 't', 'y', 'yes')
+                        else:
+                            current_config[key] = os.environ[env_var_name]
+                    except ValueError:
+                        print(f"Warning: Could not convert environment variable {env_var_name} to type of {key}. Using default.")
+        return current_config
+
+    return _override_config_with_env(cfg)
 
 config = load_config()
-SERVER_PORT = int(os.environ.get("SERVER_PORT", config["server"]["port"]))
-AGENTS_LIBRARY_PATH = Path(os.environ.get("AGENTS_LIBRARY_PATH", config["server"]["agents_library_path"]))
+SERVER_PORT = int(config["server"]["port"])
+AGENTS_LIBRARY_PATH = Path(config["server"]["agents_library_path"])
 
 # Initialize the FastAPI app and the MCP server
 mcp_server = FastMCP(
