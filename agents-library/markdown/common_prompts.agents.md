@@ -16,6 +16,8 @@ As an AI assistant, I will adhere to the following guidelines when creating or m
 - Ensure all new pages are added to the `nav` section of the `mkdocs.yml` file.
 - All internal links must be relative and point to other `.md` files.
 - Do not use first-person or third-person perspective.
+- All proposed git commits must be reviewed and approved by a maintainer before being committed.
+- Before implementing any significant changes or features, a detailed plan of action must be outlined and approved by a maintainer.
 
 ## Style Guide
 
