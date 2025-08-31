@@ -59,7 +59,7 @@ tasks:
     desc: "Run Python unit tests"
     cmds:
       - |
-        source venv/bin/activate && PYTHONPATH=. pytest tests/test_server.py
+        PYTHONPATH=. ./venv/bin/pytest tests/test_server.py
   default:
     cmds:
       - task -l
