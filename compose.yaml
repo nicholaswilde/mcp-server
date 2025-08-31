@@ -14,5 +14,9 @@ services:
     environment:
       - PUID=${PUID:-1000}
       - PGID=${PGID:-1000}
-      - AGENTS_LIBRARY_PATH=/app/agents-library
+      - SERVER_PORT=${SERVER_PORT:-8080}
+      - AGENTS_LIBRARY_PATH=${AGENTS_LIBRARY_PATH:-/app/agents-library}
+      - MCP_SERVER_NAME=${MCP_SERVER_NAME:-mcp-server}
+      - MCP_SERVER_STREAMABLE_HTTP_PATH=${MCP_SERVER_STREAMABLE_HTTP_PATH:-/}
+      - MCP_SERVER_JSON_RESPONSE=${MCP_SERVER_JSON_RESPONSE:-true}
     restart: unless-stopped

@@ -62,11 +62,21 @@ To run the server with Docker Compose, use the following command:
 docker compose up
 ```
 
-For custom user and group IDs, you can set `PUID` and `PGID` environment variables in your `compose.yaml` or directly in your shell:
+For custom user and group IDs, server port, agents library path, and MCP server settings, you can set the following environment variables in your `compose.yaml` or directly in your shell:
 
 ```bash
-PUID=1000 PGID=1000 docker compose up
+PUID=1000 PGID=1000 SERVER_PORT=8080 AGENTS_LIBRARY_PATH=/app/agents-library MCP_SERVER_NAME=mcp-server MCP_SERVER_STREAMABLE_HTTP_PATH=/ MCP_SERVER_JSON_RESPONSE=true docker compose up
 ```
+
+**Environment Variables:**
+
+*   `PUID`: User ID for the container process (default: `1000`).
+*   `PGID`: Group ID for the container process (default: `1000`).
+*   `SERVER_PORT`: Port on which the FastAPI server will listen (default: `8080`).
+*   `AGENTS_LIBRARY_PATH`: Path to the agents library within the container (default: `/app/agents-library`).
+*   `MCP_SERVER_NAME`: Name of the MCP server (default: `mcp-server`).
+*   `MCP_SERVER_STREAMABLE_HTTP_PATH`: HTTP path for streamable content (default: `/`).
+*   `MCP_SERVER_JSON_RESPONSE`: Whether to return JSON responses (default: `true`).
 
 ### Using Uvicorn
 

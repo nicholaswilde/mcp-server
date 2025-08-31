@@ -6,8 +6,7 @@ ARG VERSION=latest
 ENV APP_VERSION=$VERSION
 
 # Set environment variables for PUID and PGID with default values
-ENV PUID=1000
-ENV PGID=1000
+
 
 # Set the working directory in the container
 WORKDIR /app
