@@ -50,3 +50,4 @@ To set up and run this project, follow these steps:
 *   **Virtual Environments**: Always use a virtual environment for dependency management.
 *   **Dependencies**: All Python dependencies should be listed in `requirements.txt`.
 *   **Git Commit Messages**: When creating commit messages using `git commit -m`, avoid using command substitution (e.g., `$(...)`, `<(...)`, `>(...)`) as it is not allowed for security reasons. Provide the commit message directly as a string.
+*   **Git Tags**: When creating git tags, always use an annotated tag with a message using the `-a` and `-m` flags (e.g., `git tag -a v1.0.0 -m "Release v1.0.0"`). This prevents the command from attempting to open an editor in non-interactive environments.
