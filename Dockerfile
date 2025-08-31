@@ -6,6 +6,10 @@ ARG VERSION=latest
 ENV APP_VERSION=$VERSION
 
 # Set environment variables for PUID and PGID with default values
+ENV PUID=1000
+ENV PGID=1000
+ENV AGENTS_LIBRARY_PATH=/app/agents-library
+ENV PYTHONUNBUFFERED=1
 
 
 # Set the working directory in the container
@@ -19,7 +23,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN groupadd -g $PGID abc && useradd -u $PUID -g abc -s /bin/bash -m abc
 
 # Copy the application code
-COPY app/server.py ./app/server.py
+COPY app/ ./app/
 COPY agents-library/ ./agents-library/
 COPY config.yaml .
 

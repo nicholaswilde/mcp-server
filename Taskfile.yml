@@ -9,25 +9,21 @@ tasks:
   gflash:
     desc: Run Gemini with the gemini-2.5-flash model.
     cmds:
-      - |
-        gemini -m gemini-{{ .VER }}-flash
+      - gemini -m gemini-{{ .VER }}-flash
   glite:
     desc: Run Gemini with the gemini-2.5-flash-lite model.
     cmds:
-      - |
-        {{ .SOURCE }} && gemini -m gemini-{{ .VER }}-flash-lite
+      - gemini -m gemini-{{ .VER }}-flash-lite
 
   gpro:
     desc: 'Run Gemini with the gemini-{{ .VER }}-pro model.'
     cmds:
-      - |
-        {{ .SOURCE }} && gemini -m gemini-{{ .VER }}-pro
+      - gemini -m gemini-{{ .VER }}-pro
 
   install:
     desc: "Install Python dependencies"
     cmds:
-      - |
-        source venv/bin/activate && pip install -r requirements.txt
+      - ./venv/bin/pip install -r requirements.txt
 
   run:
     desc: "Run the FastAPI server"
@@ -37,25 +33,26 @@ tasks:
       - |
         {{ .TASKFILE_DIR }}/venv/bin/python -m uvicorn app.server:app --host 0.0.0.0 --port 8080 --reload
     ignore_error: true
+
   lint:
     desc: "Run linting checks"
     cmds:
       - echo "No linting configured yet." # TODO: Add actual linting command (e.g., ruff, flake8)
 
-  docker-build:
+  build:
     desc: "Build the Docker image"
     cmds:
-      - docker build -t nicholaswilde/mcp-server . --load
+      - docker build --no-cache -t nicholaswilde/mcp-server . --load
 
   docker-run:
     desc: "Run the Docker container"
     cmds:
-      - docker run -p 8080:8080 -e AGENTS_LIBRARY_PATH=/app/agents-library nicholaswilde/mcp-server
+      - docker run -p 8080:8080 nicholaswilde/mcp-server
 
-  docker-build-and-load:
+  load:
     desc: "Build and load the Docker image"
     cmds:
-      - task: docker-build
+      - task: build
       - task: docker-run
 
   test:
