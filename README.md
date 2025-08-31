@@ -1,6 +1,13 @@
-# MCP Server
+# :robot: MCP Server :desktop_computer:
+[![task](https://img.shields.io/badge/Task-Enabled-brightgreen?style=for-the-badge&logo=task&logoColor=white)](https://taskfile.dev/#/)
+[![docs](https://img.shields.io/github/actions/workflow/status/nicholaswilde/mcp-server/test.yaml?label=docs&style=for-the-badge&branch=main)](https://github.com/nicholaswilde/mcp-server/actions/workflows/test.yaml)
+
+An MCP server that serves custom AGENTS.md files and bash scripts.
 
 This is a Python project designed to serve as an MCP (Multi-Cloud Platform) server. It utilizes FastAPI for the web framework and Uvicorn as the ASGI server. The project also includes an `agents-library` for managing agent-related rules and prompts.
+
+> [!WARNING]
+> This project is currently in a development stage. Features and configurations are subject to change, and breaking changes may be introduced at any time.
 
 ## :rocket: Technologies Used
 
