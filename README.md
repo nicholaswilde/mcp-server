@@ -16,10 +16,16 @@ This is a Python project designed to serve as an MCP (Multi-Cloud Platform) serv
 *   `requirements.txt`: Lists Python dependencies.
 *   `app/`:
     *   `server.py`: The main application server.
-*   `agents-library/`:
-    *   `dev_rules.agents.md`: Development-related agent rules.
-    *   `security_checks.agents.md`: Security-related agent checks.
-    *   `common_prompts.agents.md`: Common prompts for agents.
+    *   `agents-library/`:
+        *   `bash/`: Contains bash scripts.
+            *   `uptime.sh`: Example uptime script.
+        *   `markdown/`: Contains markdown agent instruction files.
+            *   `common_prompts.agents.md`: Common prompts for agents.
+            *   `dev_rules.agents.md`: Development-related agent rules.
+            *   `fantasy_football_ai.agents.md`: Git commit and tagging conventions.
+            *   `frame_fi.agents.md`: Bash and Python scripting guidelines.
+            *   `homelab_docs.agents.md`: Markdown documentation guidelines.
+            *   `security_checks.agents.md`: Security-related agent checks.
 
 ## :checkered_flag: Getting Started
 
@@ -54,6 +60,12 @@ To run the server with Docker Compose, use the following command:
 
 ```bash
 docker compose up
+```
+
+For custom user and group IDs, you can set `PUID` and `PGID` environment variables in your `compose.yaml` or directly in your shell:
+
+```bash
+PUID=1000 PGID=1000 docker compose up
 ```
 
 ### Using Uvicorn
