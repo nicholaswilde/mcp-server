@@ -38,7 +38,7 @@ async def load_agents_data(agents_library_path: Path):
         print(f"Directory not found: {agents_library_path}")
         return
 
-    for file_path in agents_library_path.glob("*.agents.md"):
+    for file_path in agents_library_path.glob("markdown/*.agents.md"):
         try:
             content = file_path.read_text(encoding="utf-8")
             # Use the filename (without extension) as the tool name
@@ -68,7 +68,7 @@ async def load_bash_scripts(agents_library_path: Path):
             return stdout.decode().strip()
         return _run_script
 
-    for file_path in agents_library_path.glob("*.sh"):
+    for file_path in agents_library_path.glob("bash/*.sh"):
         try:
             script_name = file_path.stem
             resource_uri = f"resource://scripts/{script_name}"

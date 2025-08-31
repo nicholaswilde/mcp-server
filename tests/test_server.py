@@ -15,11 +15,15 @@ import app.server
 def test_agents_library_path(tmp_path_factory):
     """Creates a temporary directory for AGENTS_LIBRARY_PATH and populates it with dummy files."""
     temp_dir = tmp_path_factory.mktemp("agents_library")
+    markdown_dir = temp_dir / "markdown"
+    markdown_dir.mkdir()
+    bash_dir = temp_dir / "bash"
+    bash_dir.mkdir()
 
     # Create dummy AGENTS.md files
-    (temp_dir / "dev_rules.agents.md").write_text("## Development Rules")
-    (temp_dir / "security_checks.agents.md").write_text("## Security Checks")
-    (temp_dir / "common_prompts.agents.md").write_text("## Common Prompts")
+    (markdown_dir / "dev_rules.agents.md").write_text("## Development Rules")
+    (markdown_dir / "security_checks.agents.md").write_text("## Security Checks")
+    (markdown_dir / "common_prompts.agents.md").write_text("## Common Prompts")
 
     # Set the environment variable for the test session
     os.environ["AGENTS_LIBRARY_PATH"] = str(temp_dir)
@@ -40,7 +44,7 @@ def client(test_agents_library_path):
     # Create a TestClient directly for the main FastAPI app
     with TestClient(app.server.app) as c:
         # Create a dummy uptime.sh script in the temporary agents-library path
-        uptime_script_path = test_agents_library_path / "uptime.sh"
+        uptime_script_path = test_agents_library_path / "bash" / "uptime.sh"
         uptime_script_path.write_text("#!/bin/bash\necho \"System is up!\"")
 
         # Define the _run_script callable for the uptime resource
@@ -137,7 +141,7 @@ async def test_list_agents_instructions(client):
 async def test_get_uptime_script_resource(client, test_agents_library_path):
     """Test retrieving the dynamically loaded uptime script resource."""
     # Create a dummy uptime.sh script in the temporary agents-library path
-    (test_agents_library_path / "uptime.sh").write_text("#!/bin/bash\necho \"System is up!\"")
+    (test_agents_library_path / "bash" / "uptime.sh").write_text("#!/bin/bash\necho \"System is up!\"")
 
     response = client.post(
         "/test/read_resource",
