@@ -169,6 +169,6 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           release_name: Release ${{ github.ref_name }}
-          body: ${{ steps.run_gemini.outputs.result }} # Changed from steps.gemini.outputs.result
+          body: ${{ steps.run_gemini.outputs.summary }} # Changed from steps.gemini.outputs.result
           draft: true
           prerelease: false
