@@ -1,6 +1,6 @@
 # :robot: MCP Server :desktop_computer:
 [![task](https://img.shields.io/badge/Task-Enabled-brightgreen?style=for-the-badge&logo=task&logoColor=white)](https://taskfile.dev/#/)
-[![docs](https://img.shields.io/github/actions/workflow/status/nicholaswilde/mcp-server/test.yaml?label=docs&style=for-the-badge&branch=main)](https://github.com/nicholaswilde/mcp-server/actions/workflows/test.yaml)
+[![docs](https://img.shields.io/github/actions/workflow/status/nicholaswilde/mcp-server/test.yml?label=test&style=for-the-badge&branch=main)](https://github.com/nicholaswilde/mcp-server/actions/workflows/test.yml)
 
 An MCP server that serves custom AGENTS.md files and bash scripts.
 
