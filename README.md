@@ -149,21 +149,19 @@ list_agents_instructions
 
 **Output**
 
-```json
- ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────╮
- │ ✔ list_agents_instructions (sharedAgents MCP Server) list_agents_instructions (sharedAgents MCP Server)  │
- │                                                                                                           │
- │    {                                                                                                      │
- │      "files": [                                                                                           │
- │        "frame_fi",                                                                                        │
- │        "fantasy_football_ai",                                                                             │
- │        "security_checks",                                                                                 │
- │        "dev_rules",                                                                                       │
- │        "common_prompts",                                                                                  │
- │        "homelab_docs"                                                                                     │
- │      ]                                                                                                    │
- │    }                                                                                                      │
- ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+✔ list_agents_instructions (sharedAgents MCP Server) list_agents_instructions (sharedAgents MCP Server)  
+                                                                                                          
+   {                                                                                                      
+     "files": [                                                                                           
+       "frame_fi",                                                                                        
+       "fantasy_football_ai",                                                                             
+       "security_checks",                                                                                 
+       "dev_rules",                                                                                       
+       "common_prompts",                                                                                  
+       "homelab_docs"                                                                                     
+     ]                                                                                                    
+   }                                                                                                     
 ```
 
 ```bash
