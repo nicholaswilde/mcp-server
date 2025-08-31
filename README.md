@@ -90,7 +90,7 @@ Add the following to your `settings.json` file:
 ```json
 {
   "mcpServers": {
-    "httpServer": {
+    "sharedAgents": {
       "httpUrl": "http://<ip-address>:8080"
     }
   }
@@ -102,15 +102,71 @@ Add the following to your `settings.json` file:
 Once the `mcp-server` is configured in `gemini-cli`, you can use the `mcp` tool to interact with the server. For example, to list all available agent instructions:
 
 ```bash
-gemini mcp list_agents_instructions
+/mcp list
 ```
 
-To retrieve a specific agent instruction file:
+**Output**
 
 ```bash
-gemini mcp get_agents_instructions --file_name dev_rules.agents.md
+  🟢 sharedAgents - Ready (2 tools)
+    Tools:
+    - get_agents_instructions
+    - list_agents_instructions
 ```
 
+```bash
+list_agents_instructions
+```
+
+**Output**
+
+```json
+ ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+ │ ✔ list_agents_instructions (sharedAgents MCP Server) list_agents_instructions (sharedAgents MCP Server)  │
+ │                                                                                                           │
+ │    {                                                                                                      │
+ │      "files": [                                                                                           │
+ │        "frame_fi",                                                                                        │
+ │        "fantasy_football_ai",                                                                             │
+ │        "security_checks",                                                                                 │
+ │        "dev_rules",                                                                                       │
+ │        "common_prompts",                                                                                  │
+ │        "homelab_docs"                                                                                     │
+ │      ]                                                                                                    │
+ │    }                                                                                                      │
+ ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+```bash
+get_agents_instructions common_prompts
+```
+
+**Output**
+
+```
+✦ I have retrieved the "common_prompts" instructions. It contains guidelines for creating Markdown
+  documentation and for scripting in Bash and Python.
+```
+
+Example `gemini-cli` prompt to use the `common_prompts` agent to create a bash script.
+
+```bash
+using the get_agents_instructions common_prompts agent, write me a bash script that checks
+downloads the latest release of sops from GitHub with architecture amd64 and linux. 
+```
+
+>[!TIP]
+>It's important to add the `get_agents_instructions` to the prompt so that `gemini-cli` knows which tool to use to retrieve the remote agent.
+
+Instead of explictly stating to use the mcp agent in every prompt, instruct `gemini-cli` to use the MCP server's `common_prompts` by adding the following to the project's `AGENTS.md` file.
+
+```markdown
+# Agent Instructions
+
+## Bash Scripting Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `common_prompts` agent whenever a user asks to create or modify a bash script.
+```
 See [reference][1].
 
 ## :balance_scale: License
