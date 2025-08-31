@@ -48,26 +48,32 @@ jobs:
           permission-issues: 'write'
           permission-pull-requests: 'write'
 
-      # Step 2: Determine the previous tag.
-      # This is used as the starting point for the commit log.
-      # It finds the tag just before the one that triggered the workflow.
-      - name: Get previous tag
-        id: previoustag
+      - name: Determine Tags
+        id: determine_tags
         run: |
-          echo "tag=$(git describe --tags --abbrev=0 "HEAD^")" >> $GITHUB_OUTPUT
+          CURRENT_TAG="${{ github.event.inputs.current_tag || github.ref_name }}"
+          PREVIOUS_TAG="${{ github.event.inputs.previous_tag }}"
 
-      # Step 3: Get the commit log between the previous and current tags.
-      # If no previous tag is found (e.g., for the very first release),
-      # it gets all commits for the current tag.
+          if [ -z "$PREVIOUS_TAG" ]; then
+            # If previous_tag input is not provided, try to find it using git describe
+            # This is for push:tags or when workflow_dispatch doesn't provide previous_tag
+            PREVIOUS_TAG=$(git describe --tags --abbrev=0 "$CURRENT_TAG^" 2>/dev/null || echo "")
+          fi
+
+          echo "current_tag=$CURRENT_TAG" >> $GITHUB_OUTPUT
+          echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+
       - name: Get commit log
         id: gitlog
         run: |
-          if [ -z "${{ steps.previoustag.outputs.tag }}" ]; then
-            log=$(git log ${{ github.ref_name }} --pretty=format:'- %s')
+          CURRENT_TAG="${{ steps.determine_tags.outputs.current_tag }}"
+          PREVIOUS_TAG="${{ steps.determine_tags.outputs.previous_tag }}"
+
+          if [ -z "$PREVIOUS_TAG" ]; then
+            log=$(git log "$CURRENT_TAG" --pretty=format:'- %s')
           else
-            log=$(git log ${{ steps.previoustag.outputs.tag }}...${{ github.ref_name }} --pretty=format:'- %s')
+            log=$(git log "$PREVIOUS_TAG"...$CURRENT_TAG --pretty=format:'- %s')
           fi
-          # Using a delimiter for multiline strings in GitHub Actions
           echo "log<<EOF" >> $GITHUB_OUTPUT
           echo "$log" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
