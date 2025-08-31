@@ -204,26 +204,27 @@ async def update_agents_file(file_name: str, new_content: str) -> str:
         file_name: The name of the file to update (e.g., 'common_prompts').
         new_content: The new content to write to the file.
     """
-    # Normalize the file name to ensure it ends with the correct extension
-    if not file_name.endswith(".agents.md"):
-        file_name += ".agents.md"
-
-    # Define the base directory for agents and ensure the file is in the markdown subdirectory
-    target_dir = AGENTS_LIBRARY_PATH / "markdown"
-    file_path = target_dir / file_name
-
-    # Security check: Ensure the file exists and is within the allowed directory
-    if not file_path.is_relative_to(target_dir):
-        raise HTTPException(
-            status_code=403,
-            detail=f"Access denied: '{file_name}' is not in the allowed directory."
-        )
-
     # Security check: Ensure the file has the correct extension
-    if not file_path.name.endswith(".agents.md"):
+    if not file_name.endswith(".agents.md"):
         raise HTTPException(
             status_code=403,
             detail="File must end with '.agents.md'."
+        )
+
+    # Define the base directory for agents and ensure the file is in the markdown subdirectory
+    target_dir = AGENTS_LIBRARY_PATH / "markdown"
+    
+    # Resolve the absolute path of the target directory to prevent path traversal attacks
+    safe_target_dir = target_dir.resolve()
+    
+    # Construct the full file path and resolve it to its absolute path
+    file_path = (target_dir / file_name).resolve()
+
+    # Security check: Ensure the resolved file path is within the safe target directory
+    if not str(file_path).startswith(str(safe_target_dir)):
+        raise HTTPException(
+            status_code=403,
+            detail=f"Access denied: '{file_name}' is not in the allowed directory."
         )
 
     try:

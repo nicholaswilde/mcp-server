@@ -40,6 +40,7 @@ def client(test_agents_library_path):
     # Reload app.server to ensure the environment variable is picked up
     # test_agents_library_path already sets os.environ["AGENTS_LIBRARY_PATH"]
     importlib.reload(app.server)
+    app.server.AGENTS_LIBRARY_PATH = test_agents_library_path
 
     # Create a TestClient directly for the main FastAPI app
     with TestClient(app.server.app) as c:
@@ -155,3 +156,97 @@ async def test_get_uptime_script_resource(client, test_agents_library_path):
     )
     assert response.status_code == 200
     assert "System is up!" in response.json()["content"]
+
+@pytest.mark.asyncio
+async def test_update_agents_file_success(client, test_agents_library_path):
+    """Test updating an existing AGENTS.md file."""
+    file_name = "dev_rules.agents.md"
+    new_content = "## Updated Development Rules"
+    response = client.post(
+        "/test/call_tool",
+        json={
+            "tool_name": "update_agents_file",
+            "args": {"file_name": file_name, "new_content": new_content}
+        },
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        }
+    )
+    assert response.status_code == 200
+    assert response.json()[0][0]["text"] == f"Successfully updated '{file_name}'."
+
+    # Verify content was actually updated in the file system
+    updated_file_path = test_agents_library_path / "markdown" / file_name
+    assert updated_file_path.read_text() == new_content
+
+    # Verify content was reloaded into agents_data
+    assert app.server.agents_data["dev_rules"] == new_content
+
+@pytest.mark.asyncio
+async def test_update_agents_file_create_new(client, test_agents_library_path):
+    """Test creating a new AGENTS.md file."""
+    file_name = "new_agent.agents.md"
+    new_content = "## New Agent Instructions"
+    response = client.post(
+        "/test/call_tool",
+        json={
+            "tool_name": "update_agents_file",
+            "args": {"file_name": file_name, "new_content": new_content}
+        },
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        }
+    )
+    assert response.status_code == 200
+    assert response.json()[0][0]["text"] == f"Successfully updated '{file_name}'."
+
+    # Verify new file was created in the file system
+    new_file_path = test_agents_library_path / "markdown" / file_name
+    assert new_file_path.read_text() == new_content
+
+    # Verify content was loaded into agents_data
+    assert app.server.agents_data["new_agent"] == new_content
+
+@pytest.mark.asyncio
+async def test_update_agents_file_invalid_extension(client):
+    """Test updating a file with an invalid extension."""
+    file_name = "bad_file.txt"
+    new_content = "Some content"
+    response = client.post(
+        "/test/call_tool",
+        json={
+            "tool_name": "update_agents_file",
+            "args": {"file_name": file_name, "new_content": new_content}
+        },
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        }
+    )
+    assert response.status_code == 500
+    content_json = response.json()
+    expected_detail_substring = "Tool execution failed: Error executing tool update_agents_file: 403: File must end with '.agents.md'."
+    assert expected_detail_substring in content_json["detail"]
+
+@pytest.mark.asyncio
+async def test_update_agents_file_path_traversal(client):
+    """Test path traversal attempt."""
+    file_name = "../../bad_location.agents.md"
+    new_content = "Malicious content"
+    response = client.post(
+        "/test/call_tool",
+        json={
+            "tool_name": "update_agents_file",
+            "args": {"file_name": file_name, "new_content": new_content}
+        },
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        }
+    )
+    assert response.status_code == 500
+    content_json = response.json()
+    expected_detail_substring = "Tool execution failed: Error executing tool update_agents_file: 403: Access denied: '../../bad_location.agents.md' is not in the allowed directory."
+    assert expected_detail_substring in content_json["detail"]
