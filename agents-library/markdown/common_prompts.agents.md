@@ -25,7 +25,7 @@ As an AI assistant, I will adhere to the following guidelines when creating or m
 - **Lists:** Use hyphens for unordered lists and numbers for ordered lists.
 - **Icons & Emojis:** Use Material Design icons and emojis where appropriate, using shortcodes.
 - **Indentation:** Use 2 spaces for indentation.
-- **Links:** List items that are links should be enclosed with `<` and `>`.
+- **Links:** List items that are links should be enclosed with `<` and `>` if they do no use square brackets (e.g. [link][1]).
 - **Linting:** Formatting shall be compatible with markdownlint.
 - **Hyperlinks:** All hyperlinks should reference a number at the bottom of the document.
 
@@ -104,6 +104,25 @@ As an AI assistant, I will adhere to the following guidelines when creating or m
 - I will not store sensitive information in scripts.
 - I will use `shellcheck` to lint my scripts and identify potential issues.
 
+### 8. Commented Header
+
+- Every bash script must start with a commented header in the following format. The values should be automatically populated based on the script's purpose.
+
+```
+#!/usr/bin/env bash
+################################################################################
+#
+# Script Name: <script_name>.sh
+# ----------------
+# <A description of the script's purpose>
+#
+# @author Nicholas Wilde, 0xb299a622
+# @date <Current Date in DD MM YYYY format>
+# @version <Version in semver format>
+#
+################################################################################
+```
+
 By following these guidelines, I will create bash scripts that are reliable, easy to understand, and secure.
 
 ## Python
@@ -144,5 +163,24 @@ By following these guidelines, I will create bash scripts that are reliable, eas
 - I will be cautious about using `eval`.
 - I will not store sensitive information in scripts.
 - I will use `bandit` to lint my scripts and identify potential security issues.
+
+### 8. Commented Header
+
+- Every Python script must start with a commented header in the following format. The values should be automatically populated based on the script's purpose.
+
+```
+#!/usr/bin/env python3
+################################################################################
+#
+# Script Name: <script_name>.py
+# ----------------
+# <A description of the script's purpose>
+#
+# @author Nicholas Wilde, 0xb299a622
+# @date <Current Date in DD MM YYYY format>
+# @version <Version in semver format>
+#
+################################################################################
+```
 
 By following these guidelines, I will create python scripts that are reliable, easy to understand, and secure.

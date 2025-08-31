@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from mcp.server import FastMCP
 from mcp.server.fastmcp.resources import FunctionResource
 from mcp.server.fastmcp.exceptions import ToolError
+import shutil
 
 # Configuration
 def load_config():
@@ -182,6 +183,51 @@ async def list_agents_instructions() -> Dict[str, list]:
     Handler to list all available AGENTS.md files.
     """
     return {"files": list(agents_data.keys())}
+
+@mcp_server.tool(
+    name="update_agents_file",
+    description="Updates the content of a specific AGENTS.md file in the agents-library."
+)
+async def update_agents_file(file_name: str, new_content: str) -> str:
+    """
+    Handler to update a markdown file in the agents-library.
+
+    Args:
+        file_name: The name of the file to update (e.g., 'common_prompts').
+        new_content: The new content to write to the file.
+    """
+    # Normalize the file name to ensure it ends with the correct extension
+    if not file_name.endswith(".agents.md"):
+        file_name += ".agents.md"
+
+    # Define the base directory for agents and ensure the file is in the markdown subdirectory
+    target_dir = AGENTS_LIBRARY_PATH / "markdown"
+    file_path = target_dir / file_name
+
+    # Security check: Ensure the file exists and is within the allowed directory
+    if not file_path.is_relative_to(target_dir):
+        raise HTTPException(
+            status_code=403,
+            detail=f"Access denied: '{file_name}' is not in the allowed directory."
+        )
+
+    # Security check: Ensure the file has the correct extension
+    if not file_path.name.endswith(".agents.md"):
+        raise HTTPException(
+            status_code=403,
+            detail="File must end with '.agents.md'."
+        )
+
+    try:
+        # Write the new content to the file
+        file_path.write_text(new_content, encoding="utf-8")
+
+        # Reload agents data to reflect the changes in memory
+        await load_agents_data(AGENTS_LIBRARY_PATH)
+
+        return f"Successfully updated '{file_name}'."
+    except Exception as e:
+        raise ToolError(f"Error updating file '{file_name}': {e}")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=SERVER_PORT)
