@@ -149,6 +149,14 @@ class ResourceReadRequest(BaseModel):
 async def test_call_tool(request: ToolCallRequest):
     return await mcp_server.call_tool(request.tool_name, request.args)
 
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint.
+    """
+    return {"status": "ok"}
+
+
 @app.post("/test/read_resource")
 async def test_read_resource(request: ResourceReadRequest):
     # The read_resource returns an Iterable[ReadResourceContents]

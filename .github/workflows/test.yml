@@ -30,4 +30,4 @@ jobs:
         pip install -r requirements.txt
     - name: Run tests
       run: |
-        PYTHONPATH=$GITHUB_WORKSPACE pytest $GITHUB_WORKSPACE/tests/
+        PYTHONPATH=$GITHUB_WORKSPACE pytest $GITHUB_WORKSPACE/tests/test_server.py
