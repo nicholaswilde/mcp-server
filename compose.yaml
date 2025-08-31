@@ -19,3 +19,9 @@ services:
       - MCP_SERVER_STREAMABLE_HTTP_PATH=${MCP_SERVER_STREAMABLE_HTTP_PATH:-/}
       - MCP_SERVER_JSON_RESPONSE=${MCP_SERVER_JSON_RESPONSE:-true}
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s

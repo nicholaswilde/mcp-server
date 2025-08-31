@@ -36,5 +36,8 @@ USER abc
 # Expose the port the app runs on
 EXPOSE 8080
 
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 CMD curl -f http://localhost:8080/health || exit 1
+
 # Run the app
 CMD ["uvicorn", "app.server:app", "--host", "0.0.0.0", "--port", "8080"]
