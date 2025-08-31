@@ -12,5 +12,7 @@ services:
     volumes:
       - ./agents-library:/app/agents-library
     environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
       - AGENTS_LIBRARY_PATH=/app/agents-library
     restart: unless-stopped

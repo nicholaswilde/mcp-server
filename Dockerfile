@@ -5,6 +5,10 @@ FROM python:3.10-slim
 ARG VERSION=latest
 ENV APP_VERSION=$VERSION
 
+# Set environment variables for PUID and PGID with default values
+ENV PUID=1000
+ENV PGID=1000
+
 # Set the working directory in the container
 WORKDIR /app
 
@@ -12,10 +16,19 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Create a non-root user and group with specified PUID and PGID
+RUN groupadd -g $PGID abc && useradd -u $PUID -g abc -s /bin/bash -m abc
+
 # Copy the application code
 COPY app/server.py ./app/server.py
 COPY agents-library/ ./agents-library/
 COPY config.yaml .
+
+# Set ownership of the /app directory to the new user
+RUN chown -R abc:abc /app
+
+# Switch to the non-root user
+USER abc
 
 # Expose the port the app runs on
 EXPOSE 8080
