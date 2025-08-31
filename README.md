@@ -130,6 +130,8 @@ Add the following to your `settings.json` file:
 
 Once the `mcp-server` is configured in `gemini-cli`, you can use the `mcp` tool to interact with the server. For example, to list all available agent instructions:
 
+**Prompt**
+
 ```bash
 /mcp list
 ```
@@ -142,6 +144,8 @@ Once the `mcp-server` is configured in `gemini-cli`, you can use the `mcp` tool 
     - get_agents_instructions
     - list_agents_instructions
 ```
+
+**Prompt**
 
 ```bash
 list_agents_instructions
@@ -163,6 +167,8 @@ list_agents_instructions
      ]                                                                                                    
    }                                                                                                     
 ```
+
+**Prompt**
 
 ```bash
 get_agents_instructions common_prompts
