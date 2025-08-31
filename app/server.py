@@ -190,7 +190,7 @@ async def list_agents_instructions() -> Dict[str, list]:
     """
     Handler to list all available AGENTS.md files.
     """
-    return {"files": list(agents_data.keys())}
+    return {"files": sorted(list(agents_data.keys()))}
 
 @mcp_server.tool(
     name="update_agents_file",

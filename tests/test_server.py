@@ -135,7 +135,7 @@ async def test_list_agents_instructions(client):
     )
     assert response.status_code == 200
     content_json = json.loads(response.json()[0][0]["text"])
-    assert content_json == {"files": ["common_prompts", "security_checks", "dev_rules"]}
+    assert content_json == {"files": ["common_prompts", "dev_rules", "security_checks"]}
 
 @pytest.mark.asyncio
 async def test_get_uptime_script_resource(client, test_agents_library_path):
