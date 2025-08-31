@@ -16,12 +16,14 @@ This is a Python project designed to serve as an MCP (Multi-Cloud Platform) serv
 *   `app/`:
     *   `server.py`: The main application server.
 *   `agents-library/`:
-    *   `common_prompts.agents.md`: Common prompts for agents.
-    *   `dev_rules.agents.md`: Development-related agent rules.
-    *   `fantasy_football_ai.agents.md`: Git commit and tagging conventions.
-    *   `frame_fi.agents.md`: Bash and Python scripting guidelines.
-    *   `homelab_docs.agents.md`: Markdown documentation guidelines.
-    *   `security_checks.agents.md`: Security-related agent checks.
+    *   `bash/`: Contains bash scripts.
+    *   `markdown/`: Contains markdown agent instruction files.
+        *   `common_prompts.agents.md`: Common prompts for agents.
+        *   `dev_rules.agents.md`: Development-related agent rules.
+        *   `fantasy_football_ai.agents.md`: Git commit and tagging conventions.
+        *   `frame_fi.agents.md`: Bash and Python scripting guidelines.
+        *   `homelab_docs.agents.md`: Markdown documentation guidelines.
+        *   `security_checks.agents.md`: Security-related agent checks.
 
 ## Building and Running
 
@@ -39,7 +41,9 @@ To set up and run this project, follow these steps:
     ```
 
 3.  **Run the Server:**
-    (TODO: Add instructions for running `app/server.py` once its content is defined.)
+    ```bash
+    uvicorn app.server:app --host 0.0.0.0 --port 8080
+    ```
 
 ## Development Conventions
 
