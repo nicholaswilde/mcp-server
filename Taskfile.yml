@@ -4,6 +4,7 @@ version: '3'
 vars:
   VER: '2.5'
   SOURCE: 'source venv/bin/activate'
+  DOCKER_REPO: 'nicholaswilde/mcp-server'
   
 tasks:
   gflash:
@@ -40,20 +41,14 @@ tasks:
       - echo "No linting configured yet." # TODO: Add actual linting command (e.g., ruff, flake8)
 
   build:
-    desc: "Build the Docker image"
+    desc: "Build and push the Docker image for multiple architectures (amd64, arm64)"
     cmds:
-      - docker build --no-cache -t nicholaswilde/mcp-server . --load
+      - docker buildx build --platform linux/amd64,linux/arm64 -t {{ .DOCKER_REPO }}:latest --push .
 
   docker-run:
     desc: "Run the Docker container"
     cmds:
-      - docker run -p 8080:8080 nicholaswilde/mcp-server
-
-  load:
-    desc: "Build and load the Docker image"
-    cmds:
-      - task: build
-      - task: docker-run
+      - docker run -p 8080:8080 {{ .DOCKER_REPO }}
 
   test:
     desc: "Run Python unit tests"
