@@ -78,9 +78,9 @@ async def load_bash_scripts(agents_library_path: Path):
         return
 
     def create_run_script_callable(script_path: Path):
-        async def _run_script():
+        async def _run_script(project_name: str, mcp_server_url: str):
             process = await asyncio.create_subprocess_exec(
-                "bash", str(script_path),
+                "bash", str(script_path), project_name, mcp_server_url,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE
             )
@@ -102,7 +102,15 @@ async def load_bash_scripts(agents_library_path: Path):
                     uri=resource_uri,
                     name=script_name,
                     description=f"Executes the {script_name}.sh script and returns its output.",
-                    mime_type="text/plain"
+                    mime_type="text/plain",
+                    schema={
+                        "type": "object",
+                        "properties": {
+                            "project_name": {"type": "string", "description": "The name of the new project."},
+                            "mcp_server_url": {"type": "string", "description": "The URL of the MCP server (e.g., http://localhost:8080)."}
+                        },
+                        "required": ["project_name", "mcp_server_url"]
+                    }
                 )
             )
             print(f"Loaded bash script: {file_path.name} as resource '{resource_uri}'")
