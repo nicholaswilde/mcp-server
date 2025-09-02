@@ -46,19 +46,39 @@ def client(test_agents_library_path):
     with TestClient(app.server.app) as c:
         # Create a dummy uptime.sh script in the temporary agents-library path
         uptime_script_path = test_agents_library_path / "bash" / "uptime.sh"
-        uptime_script_path.write_text("#!/bin/bash\necho \"System is up!\"")
+        uptime_script_path.write_text("""#!/bin/bash
+while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+        --project_name) PROJECT_NAME="$2"; shift ;;
+        --mcp_server_url) MCP_SERVER_URL="$2"; shift ;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    esac
+    shift
+done
+echo "System is up! Project: ${PROJECT_NAME}, MCP Server: ${MCP_SERVER_URL}"""
+)
 
         # Define the _run_script callable for the uptime resource
-        async def _run_uptime_script():
-            process = await asyncio.create_subprocess_exec(
-                "bash", str(uptime_script_path),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            stdout, stderr = await process.communicate()
-            if process.returncode != 0:
-                raise Exception(f"Script execution failed: {stderr.decode().strip()}")
-            return stdout.decode().strip()
+        async def _run_uptime_script(script_timeout: int = 60, **kwargs):
+            try:
+                command_args = ["bash", str(uptime_script_path)]
+                for key, value in kwargs.items():
+                    command_args.append(f"--{key}")
+                    command_args.append(str(value))
+
+                process = await asyncio.create_subprocess_exec(
+                    *command_args,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
+                )
+                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=script_timeout)
+                if process.returncode != 0:
+                    raise Exception(f"Script execution failed: {stderr.decode().strip()}")
+                return stdout.decode().strip()
+            except asyncio.TimeoutError:
+                process.kill()
+                await process.wait()
+                raise Exception(f"Script execution timed out after {script_timeout} seconds.")
 
         # Add the uptime resource to the mcp_server instance
         app.server.mcp_server.add_resource(
@@ -67,7 +87,17 @@ def client(test_agents_library_path):
                 uri="resource://scripts/uptime",
                 name="uptime",
                 description="Executes the uptime.sh script and returns its output.",
-                mime_type="text/plain"
+                mime_type="text/plain",
+                schema={
+                    "type": "object",
+                    "properties": {
+                        "project_name": {"type": "string", "description": "The name of the new project."},
+                        "mcp_server_url": {"type": "string", "description": "The URL of the MCP server (e.g., http://localhost:8080)."},
+                        "script_timeout": {"type": "integer", "description": "Timeout for script execution in seconds (default: 60).", "default": 60}
+                    },
+                    "required": [],
+                    "additionalProperties": True
+                }
             )
         )
         yield c
@@ -147,7 +177,8 @@ async def test_get_uptime_script_resource(client, test_agents_library_path):
     response = client.post(
         "/test/read_resource",
         json={
-            "uri": "resource://scripts/uptime"
+            "uri": "resource://scripts/uptime",
+            "args": {"project_name": "test_project", "mcp_server_url": "http://localhost:8080"}
         },
         headers={
             "Accept": "application/json",
@@ -156,6 +187,76 @@ async def test_get_uptime_script_resource(client, test_agents_library_path):
     )
     assert response.status_code == 200
     assert "System is up!" in response.json()["content"]
+
+@pytest.mark.asyncio
+async def test_get_uptime_script_resource_timeout(client, test_agents_library_path):
+    """Test if the uptime script resource times out correctly."""
+    # Create a dummy uptime.sh script that sleeps for a long time
+    long_running_script_path = test_agents_library_path / "bash" / "long_running_uptime.sh"
+    long_running_script_path.write_text('''#!/bin/bash
+sleep 5
+echo "Done sleeping"''')
+
+    # Add this long-running script as a resource
+    async def _run_long_running_uptime_script(script_timeout: int = 60, **kwargs):
+        try:
+            command_args = ["bash", str(long_running_script_path)]
+            for key, value in kwargs.items():
+                command_args.append(f"--{key}")
+                command_args.append(str(value))
+
+            print(f"Executing command: {' '.join(command_args)}")
+            process = await asyncio.create_subprocess_exec(
+                *command_args,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=script_timeout)
+            print(f"Script stdout: {stdout.decode().strip()}")
+            print(f"Script stderr: {stderr.decode().strip()}")
+            if process.returncode != 0:
+                raise Exception(f"Script execution failed: {stderr.decode().strip()}")
+            return stdout.decode().strip()
+        except asyncio.TimeoutError:
+            process.kill()
+            await process.wait()
+            raise Exception(f"Script execution timed out after {script_timeout} seconds.")
+
+    app.server.mcp_server.add_resource(
+        FunctionResource(
+            fn=_run_long_running_uptime_script,
+            uri="resource://scripts/long_running_uptime",
+            name="long_running_uptime",
+            description="Executes a long-running uptime.sh script and returns its output.",
+            mime_type="text/plain",
+            schema={
+                "type": "object",
+                "properties": {
+                    "project_name": {"type": "string", "description": "The name of the new project."},
+                    "mcp_server_url": {"type": "string", "description": "The URL of the MCP server (e.g., http://localhost:8080)."},
+                    "script_timeout": {"type": "integer", "description": "Timeout for script execution in seconds (default: 60).", "default": 60}
+                },
+                "required": [],
+                "additionalProperties": True
+            }
+        )
+    )
+
+    response = client.post(
+        "/test/read_resource",
+        json={
+            "uri": "resource://scripts/long_running_uptime",
+            "args": {"project_name": "test_project", "mcp_server_url": "http://localhost:8080", "script_timeout": 1}
+        },
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        }
+    )
+    assert response.status_code == 500
+    content_json = response.json()
+    expected_detail_substring = "Script execution timed out after 1 seconds."
+    assert expected_detail_substring in content_json["detail"]
 
 @pytest.mark.asyncio
 async def test_update_agents_file_success(client, test_agents_library_path):

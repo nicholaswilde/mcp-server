@@ -78,17 +78,28 @@ async def load_bash_scripts(agents_library_path: Path):
         return
 
     def create_run_script_callable(script_path: Path):
-        async def _run_script(project_name: str, mcp_server_url: str):
-            process = await asyncio.create_subprocess_exec(
-                "bash", str(script_path), project_name, mcp_server_url,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            stdout, stderr = await process.communicate()
-            if process.returncode != 0:
-                print(f"Error running script {script_path.name}: {stderr.decode().strip()}")
-                raise HTTPException(status_code=500, detail=f"Script execution failed: {stderr.decode().strip()}")
-            return stdout.decode().strip()
+        async def _run_script(script_timeout: int = 60, **kwargs):
+            try:
+                command_args = ["bash", str(script_path)]
+                for key, value in kwargs.items():
+                    command_args.append(f"--{key}")
+                    command_args.append(str(value))
+
+                process = await asyncio.create_subprocess_exec(
+                    *command_args,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
+                )
+                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=script_timeout)
+                if process.returncode != 0:
+                    print(f"Error running script {script_path.name}: {stderr.decode().strip()}")
+                    raise HTTPException(status_code=500, detail=f"Script execution failed: {stderr.decode().strip()}")
+                return stdout.decode().strip()
+            except asyncio.TimeoutError:
+                process.kill()
+                await process.wait()
+                print(f"Error running script {script_path.name}: Timeout after {script_timeout} seconds.")
+                raise HTTPException(status_code=500, detail=f"Script execution timed out after {script_timeout} seconds.")
         return _run_script
 
     for file_path in agents_library_path.glob("bash/*.sh"):
@@ -107,9 +118,11 @@ async def load_bash_scripts(agents_library_path: Path):
                         "type": "object",
                         "properties": {
                             "project_name": {"type": "string", "description": "The name of the new project."},
-                            "mcp_server_url": {"type": "string", "description": "The URL of the MCP server (e.g., http://localhost:8080)."}
+                            "mcp_server_url": {"type": "string", "description": "The URL of the MCP server (e.g., http://localhost:8080)."},
+                            "script_timeout": {"type": "integer", "description": "Timeout for script execution in seconds (default: 60).", "default": 60}
                         },
-                        "required": ["project_name", "mcp_server_url"]
+                        "required": [],
+                        "additionalProperties": True
                     }
                 )
             )
