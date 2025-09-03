@@ -8,7 +8,7 @@ An MCP (Multi-Cloud Platform) server that provides a library of reusable agent i
 > [!WARNING]
 > This project is in a development stage. Features and configurations are subject to change.
 
-## Overview
+## :mag: Overview
 
 This server uses FastAPI to expose a set of tools that can be consumed by a compatible AI model (like Google's Gemini). The primary purpose is to provide the AI with a library of standardized instructions (`AGENTS.md` files) and utility scripts (`.sh` files). This allows the AI to perform complex, context-aware tasks consistently by drawing from a central, version-controlled library.
 
@@ -16,18 +16,18 @@ The core components are:
 -   **`app/server.py`**: The FastAPI application that serves the tools.
 -   **`agents-library/`**: The central repository for agent instructions and scripts.
 
-## Getting Started
+## :rocket: Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-### Prerequisites
+### :gear: Prerequisites
 
 -   Python 3.11+
 -   [Task](https://taskfile.dev/installation/)
 -   [Docker](https://www.docker.com/get-started) (for containerized deployment)
 -   [pre-commit](https://pre-commit.com/#installation) (for development)
 
-### Installation
+### :computer: Installation
 
 1.  **Clone the repository:**
     ```bash
@@ -54,11 +54,11 @@ These instructions will get you a copy of the project up and running on your loc
     pre-commit install
     ```
 
-## Usage
+## :running: Usage
 
 You can run the server using Task, which simplifies the process, or with Docker Compose for a containerized environment.
 
-### Running the Server Locally
+### :desktop_computer: Running the Server Locally
 
 To run the FastAPI server on your local machine:
 ```bash
@@ -66,7 +66,7 @@ task run
 ```
 The server will be available at `http://0.0.0.0:8080`. It will automatically reload when code changes are detected.
 
-### Running with Docker
+### :whale: Running with Docker
 
 To build and run the server in a Docker container:
 ```bash
@@ -78,7 +78,7 @@ task docker-run
 ```
 The server will be available at `http://localhost:8080`.
 
-### Available Tasks
+### :clipboard: Available Tasks
 
 This project uses `Task` as a command runner. Here are the most common commands:
 
@@ -91,10 +91,169 @@ This project uses `Task` as a command runner. Here are the most common commands:
 
 To see all available tasks, run `task -l`.
 
+## :gemini: Adding to gemini-cli
+
+To add this server to `gemini-cli`, you need to edit your `settings.json` file. You can find this file in `~/.gemini/settings.json` (user settings) or in `.gemini/settings.json` (project settings).
+
+Add the following to your `settings.json` file:
+
+```json
+{
+  "mcpServers": {
+    "sharedAgents": {
+      "httpUrl": "http://<ip-address>:8080"
+    }
+  }
+}
+```
+
+### :tools: Using the `mcp` tool
+
+Once the `mcp-server` is configured in `gemini-cli`, you can use the `mcp` tool to interact with the server. For example, to list all available agent instructions:
+
+**Prompt**
+
+```bash
+/mcp list
+```
+
+**Output**
+
+```bash
+  🟢 sharedAgents - Ready (2 tools)
+    Tools:
+    - get_agents_instructions
+    - list_agents_instructions
+```
+
+**Prompt**
+
+```bash
+list_agents_instructions
+```
+
+**Output**
+
+```
+✔ list_agents_instructions (sharedAgents MCP Server) list_agents_instructions (sharedAgents MCP Server)  
+
+   {                                                                                                      
+     "files": [                                                                                           
+       "frame_fi",                                                                                        
+       "fantasy_football_ai",                                                                             
+       "security_checks",                                                                                 
+       "dev_rules",                                                                                       
+       "common_prompts",                                                                                  
+       "homelab_docs"                                                                                     
+     ]                                                                                                    
+   }                                                                                                     
+```
+
+**Prompt**
+
+```bash
+get_agents_instructions common_prompts
+```
+
+**Output**
+
+```
+✦ I have retrieved the "common_prompts" instructions. It contains guidelines for creating Markdown
+  documentation and for scripting in Bash and Python.
+```
+
+Example `gemini-cli` prompt to use the `common_prompts` agent to create a bash script.
+
+```bash
+using the get_agents_instructions common_prompts agent, write me a bash script that checks
+downloads the latest release of sops from GitHub with architecture amd64 and linux. 
+```
+
+>[!TIP]
+>It's important to add the `get_agents_instructions` to the prompt so that `gemini-cli` knows which tool to use to retrieve the remote agent.
+
+Instead of explictly stating to use the mcp agent in every prompt, instruct `gemini-cli` to use the MCP server's prompts by adding the following to the project's `AGENTS.md` file.
+
+```markdown
+# Agent Instructions
+
+## Agent Rules
+
+## Cloud Best Practices Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `cloud_best_practices` agent when discussing cloud best practices.
+
+## Common Prompts Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `common_prompts` agent for general prompting guidelines.
+
+## Dev Rules Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `dev_rules` agent when discussing development rules.
+
+## Docs Guidelines Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `docs_guidelines` agent when creating or modifying documentation.
+
+## Fantasy Football AI Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `fantasy_football_ai` agent for fantasy football related queries.
+
+## Frame.fi Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `frame_fi` agent for Frame.fi related queries.
+
+## GitHub Repo Config Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `github_repo_config` agent when configuring GitHub repositories.
+
+## Homelab Docs Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `homelab_docs` agent for homelab documentation.
+
+## MkDocs Site Creation Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `mkdocs_site_creation` agent when creating MkDocs sites.
+
+## Recommended Bash Scripts Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `recommended_bash_scripts` agent when recommending bash scripts.
+
+## Scripting Guidelines Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `scripting_guidelines` agent when discussing scripting guidelines.
+
+## Security Checks Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `security_checks` agent when performing security checks.
+
+## SOPS Config Creation Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `sops_config_creation` agent when configuring SOPS.
+
+## Taskfile Creation Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `taskfile_creation` agent when creating Taskfiles.
+
+## Terraform Guidelines Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `terraform_guidelines` agent when discussing Terraform guidelines.
+
+## YAML Guidelines Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `yaml_guidelines` agent when creating or modifying YAML files.
+```
+
 ## Contributing
 
 Contributions are welcome! Please read the [contributing guidelines](./docs/contributing.md) to get started.
 
-## License
+See [reference][1].
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](./LICENSE) file for details.
+## :balance_scale: License
+
+This project is licensed under the [Apache License 2.0](./LICENSE).
+
+## :pencil: Author
+
+This project was started in 2025 by [Nicholas Wilde](https://github.com/nicholaswilde/).
