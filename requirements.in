@@ -1,5 +1,8 @@
 fastapi
 uvicorn
+ruff
+pre-commit
+
 mcp
 pytest
 httpx
