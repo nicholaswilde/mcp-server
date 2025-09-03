@@ -12,18 +12,19 @@ This is a Python project designed to serve as an MCP (Multi-Cloud Platform) serv
 ## Project Structure
 
 *   `Dockerfile`: Used for containerizing the application.
-*   `requirements.txt`: Lists Python dependencies.
-*   `app/`:
-    *   `server.py`: The main application server.
-*   `agents-library/`:
-    *   `bash/`: Contains bash scripts.
-    *   `markdown/`: Contains markdown agent instruction files.
-        *   `common_prompts.agents.md`: Common prompts for agents.
-        *   `dev_rules.agents.md`: Development-related agent rules.
-        *   `fantasy_football_ai.agents.md`: Git commit and tagging conventions.
-        *   `frame_fi.agents.md`: Bash and Python scripting guidelines.
-        *   `homelab_docs.agents.md`: Markdown documentation guidelines.
-        *   `security_checks.agents.md`: Security-related agent checks.
+*   `requirements.txt`: Lists Python dependencies, generated from `requirements.in` by `pip-compile`.
+*   `requirements.in`: Defines direct Python dependencies for the project.
+*   `app/`: Contains the core application logic.
+    *   `server.py`: The main FastAPI application server.
+*   `agents-library/`: Stores agent-related rules and prompts, categorized by type.
+    *   `bash/`: Contains bash scripts used by agents.
+    *   `markdown/`: Contains markdown files with agent instructions and prompts.
+*   `.github/`: Contains GitHub Actions workflow definitions and other repository configurations.
+*   `tests/`: Contains unit and integration tests for the application.
+    *   `test_server.py`: Tests for the main FastAPI server.
+*   `docs/`: Contains project documentation.
+    *   `contributing.md`: Guidelines for contributing to the project.
+*   `Taskfile.yml`: Defines various development tasks using Task (e.g., linting, testing, running the server).
 
 ## Building and Running
 
@@ -45,11 +46,21 @@ To set up and run this project, follow these steps:
     uvicorn app.server:app --host 0.0.0.0 --port 8080
     ```
 
+4.  **Run Linting and Formatting Checks:**
+    ```bash
+    task lint
+    ```
+
+5.  **Run Tests:**
+    ```bash
+    task test
+    ```
+
 ## Development Conventions
 
 *   **Virtual Environments**: Always use a virtual environment for dependency management.
 *   **Dependencies**: All Python dependencies should be listed in `requirements.txt`.
-*   **Git Commit Messages**: When creating commit messages using `git commit -m`, avoid using command substitution (e.g., `$(...)`, `<(...)`, `>(...)`) as it is not allowed for security reasons. Provide the commit message directly as a string.
-*   **Git Tags**: When creating git tags, always use an annotated tag with a message using the `-a` and `-m` flags (e.g., `git tag -a v1.0.0 -m "Release v1.0.0"`). This prevents the command from attempting to open an editor in non-interactive environments.
+*   **Git Commit Messages**: When creating commit messages using `git commit -m`, avoid using command substitution (e.g., `$(...)`, `<(...)`, `>(...)`) as it is not allowed for security reasons in some environments. Provide the commit message directly as a string.
+*   **Git Tags**: When creating git tags, always use an annotated tag with a message using the `-a` and `-m` flags (e.g., `git tag -a v1.0.0 -m "Release v1.0.0"`). This prevents the command from attempting to open an editor in non-interactive environments, which can cause issues in automated scripts.
 *   **Commit Approval**: All proposed git commits must be reviewed and approved by a maintainer before being committed.
 *   **Plan Approval**: Before implementing any significant changes or features, a detailed plan of action must be outlined and approved by a maintainer.
