@@ -30,6 +30,11 @@ jobs:
         pip install pip-tools # Install pip-tools first
         pip-compile requirements.in
         pip-sync
+    - name: Install Task
+      uses: arduino/setup-task@v2
+      with:
+        version: 3.x
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Run linting and formatting checks
       run: |
         task lint
