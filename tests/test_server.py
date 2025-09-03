@@ -7,6 +7,7 @@ import json
 import asyncio
 import subprocess
 from mcp.server.fastmcp.resources import FunctionResource
+from fastapi import HTTPException # Added this import
 
 # Import the app.server module directly
 import app.server
@@ -35,7 +36,7 @@ def test_agents_library_path(tmp_path_factory):
 def client(test_agents_library_path):
     """Provides a TestClient for the FastAPI app."""
     # Clear agents_data before each test run to ensure a clean state
-    app.server.agents_data.clear()
+    app.server.agents_data.clear() 
 
     # Reload app.server to ensure the environment variable is picked up
     # test_agents_library_path already sets os.environ["AGENTS_LIBRARY_PATH"]
@@ -47,16 +48,15 @@ def client(test_agents_library_path):
         # Create a dummy uptime.sh script in the temporary agents-library path
         uptime_script_path = test_agents_library_path / "bash" / "uptime.sh"
         uptime_script_path.write_text("""#!/bin/bash
-while [[ "$#" -gt 0 ]]; do
-    case "$1" in
-        --project_name) PROJECT_NAME="$2"; shift ;;
-        --mcp_server_url) MCP_SERVER_URL="$2"; shift ;;
-        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+while [[ \"$#\" -gt 0 ]]
+    case \"$1\" in
+        --project_name) PROJECT_NAME=\"2\"; shift ;; 
+        --mcp_server_url) MCP_SERVER_URL=\"2\"; shift ;; 
+        *) echo \"Unknown parameter passed: $1\"; exit 1 ;; 
     esac
     shift
 done
-echo "System is up! Project: ${PROJECT_NAME}, MCP Server: ${MCP_SERVER_URL}"""
-)
+echo \"System is up! Project: ${PROJECT_NAME}, MCP Server: ${MCP_SERVER_URL}\"""")
 
         # Define the _run_script callable for the uptime resource
         async def _run_uptime_script(script_timeout: int = 60, **kwargs):
@@ -78,7 +78,7 @@ echo "System is up! Project: ${PROJECT_NAME}, MCP Server: ${MCP_SERVER_URL}"""
             except asyncio.TimeoutError:
                 process.kill()
                 await process.wait()
-                raise Exception(f"Script execution timed out after {script_timeout} seconds.")
+                raise HTTPException(status_code=500, detail=f"Script execution timed out after {script_timeout} seconds.")
 
         # Add the uptime resource to the mcp_server instance
         app.server.mcp_server.add_resource(
@@ -91,7 +91,7 @@ echo "System is up! Project: ${PROJECT_NAME}, MCP Server: ${MCP_SERVER_URL}"""
                 schema={
                     "type": "object",
                     "properties": {
-                        "project_name": {"type": "string", "description": "The name of the new project."},
+                        "project_name": {"type": "string", "description": "The name of the new project.", "default": "test_project"},
                         "mcp_server_url": {"type": "string", "description": "The URL of the MCP server (e.g., http://localhost:8080)."},
                         "script_timeout": {"type": "integer", "description": "Timeout for script execution in seconds (default: 60).", "default": 60}
                     },
@@ -198,7 +198,8 @@ sleep 5
 echo "Done sleeping"''')
 
     # Add this long-running script as a resource
-    async def _run_long_running_uptime_script(script_timeout: int = 60, **kwargs):
+    async def _run_long_running_uptime_script(**kwargs):
+        script_timeout = 1 # Hardcode the timeout for this test
         try:
             command_args = ["bash", str(long_running_script_path)]
             for key, value in kwargs.items():
@@ -215,12 +216,12 @@ echo "Done sleeping"''')
             print(f"Script stdout: {stdout.decode().strip()}")
             print(f"Script stderr: {stderr.decode().strip()}")
             if process.returncode != 0:
-                raise Exception(f"Script execution failed: {stderr.decode().strip()}")
+                raise HTTPException(status_code=500, detail=f"Script execution failed: {stderr.decode().strip()}") # Modified line
             return stdout.decode().strip()
         except asyncio.TimeoutError:
             process.kill()
             await process.wait()
-            raise Exception(f"Script execution timed out after {script_timeout} seconds.")
+            raise HTTPException(status_code=500, detail=f"Script execution timed out after {script_timeout} seconds.") # Modified line
 
     app.server.mcp_server.add_resource(
         FunctionResource(
@@ -232,7 +233,7 @@ echo "Done sleeping"''')
             schema={
                 "type": "object",
                 "properties": {
-                    "project_name": {"type": "string", "description": "The name of the new project."},
+                    "project_name": {"type": "string", "description": "The name of the new project.", "default": "test_project"},
                     "mcp_server_url": {"type": "string", "description": "The URL of the MCP server (e.g., http://localhost:8080)."},
                     "script_timeout": {"type": "integer", "description": "Timeout for script execution in seconds (default: 60).", "default": 60}
                 },

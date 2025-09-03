@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from mcp.server import FastMCP
 from mcp.server.fastmcp.resources import FunctionResource
-from mcp.server.fastmcp.exceptions import ToolError
+from mcp.server.fastmcp.exceptions import ToolError, ResourceError, ResourceError
 import shutil
 
 # Configuration
@@ -180,13 +180,16 @@ async def health_check():
 
 @app.post("/test/read_resource")
 async def test_read_resource(request: ResourceReadRequest):
-    # The read_resource returns an Iterable[ReadResourceContents]
-    # For testing, we'll just get the first item's content
-    contents = await mcp_server.read_resource(request.uri)
-    if contents:
-        # Assuming content is text for simplicity in testing
-        return {"content": contents[0].content, "mime_type": contents[0].mime_type}
-    raise HTTPException(status_code=404, detail="Resource content not found.")
+    try:
+        # The read_resource returns an Iterable[ReadResourceContents]
+        # For testing, we'll just get the first item's content
+        contents = await mcp_server.read_resource(request.uri)
+        if contents:
+            # Assuming content is text for simplicity in testing
+            return {"content": contents[0].content, "mime_type": contents[0].mime_type}
+        raise HTTPException(status_code=404, detail="Resource content not found.")
+    except ResourceError as e:
+        raise HTTPException(status_code=500, detail=f"Resource error: {e}")
 
 @mcp_server.tool(
     name="get_agents_instructions",
