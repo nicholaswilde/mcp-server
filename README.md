@@ -1,236 +1,100 @@
-# :robot: MCP Server :desktop_computer:
-[![task](https://img.shields.io/badge/Task-Enabled-brightgreen?style=for-the-badge&logo=task&logoColor=white)](https://taskfile.dev/#/)
-[![docs](https://img.shields.io/github/actions/workflow/status/nicholaswilde/mcp-server/test.yml?label=test&style=for-the-badge&branch=main)](https://github.com/nicholaswilde/mcp-server/actions/workflows/test.yml)
+# MCP Server
 
-An MCP server that serves custom AGENTS.md files and bash scripts.
+[![Test Workflow](https://img.shields.io/github/actions/workflow/status/nicholaswilde/mcp-server/test.yml?label=test&style=for-the-badge&branch=main)](https://github.com/nicholaswilde/mcp-server/actions/workflows/test.yml)
+[![Task Enabled](https://img.shields.io/badge/Task-Enabled-brightgreen?style=for-the-badge&logo=task&logoColor=white)](https://taskfile.dev/#/)
 
-This is a Python project designed to serve as an MCP (Multi-Cloud Platform) server. It utilizes FastAPI for the web framework and Uvicorn as the ASGI server. The project also includes an `agents-library` for managing agent-related rules and prompts.
+An MCP (Multi-Cloud Platform) server that provides a library of reusable agent instructions and scripts to a generative AI model.
 
 > [!WARNING]
-> This project is currently in a development stage. Features and configurations are subject to change, and breaking changes may be introduced at any time.
+> This project is in a development stage. Features and configurations are subject to change.
 
-## :rocket: Technologies Used
+## Overview
 
-*   **Python**
-*   **FastAPI**: Web framework for building APIs.
-*   **Uvicorn**: ASGI server.
-*   **mcp**: Multi-Cloud Platform SDK.
+This server uses FastAPI to expose a set of tools that can be consumed by a compatible AI model (like Google's Gemini). The primary purpose is to provide the AI with a library of standardized instructions (`AGENTS.md` files) and utility scripts (`.sh` files). This allows the AI to perform complex, context-aware tasks consistently by drawing from a central, version-controlled library.
 
-## :open_file_folder: Project Structure
+The core components are:
+-   **`app/server.py`**: The FastAPI application that serves the tools.
+-   **`agents-library/`**: The central repository for agent instructions and scripts.
 
-*   `Dockerfile`: Used for containerizing the application.
-*   `compose.yaml`: Used for running the application with Docker Compose.
-*   `requirements.txt`: Lists Python dependencies.
-*   `app/`:
-    *   `server.py`: The main application server.
-*   `agents-library/`:
-    *   `bash/`: Contains bash scripts.
-        *   `cost_optimizer.sh`: Analyzes cloud resource usage and suggests cost-saving opportunities.
-        *   `deploy_app.sh`: Deploys a specified application to a target environment.
-        *   `health_check.sh`: Performs health checks on deployed applications or infrastructure components.
-        *   `list_markdown_files.sh`: Lists all markdown files in the `agents-library/markdown/` directory.
-        *   `manage_resource.sh`: Manages a specified cloud resource (create, delete, update).
-        *   `monitor_logs.sh`: Fetches and filters logs from various cloud logging services.
-        *   `uptime.sh`: Checks the system uptime.
-    *   `markdown/`: Contains markdown agent instruction files.
-        *   `cloud_best_practices.agents.md`: Guidelines for cloud best practices.
-        *   `common_prompts.agents.md`: Common prompts for agents.
-        *   `dev_rules.agents.md`: Development-related agent rules.
-        *   `docs_guidelines.agents.md`: Markdown documentation guidelines.
-        *   `fantasy_football_ai.agents.md`: Git commit and tagging conventions.
-        *   `frame_fi.agents.md`: Bash and Python scripting guidelines.
-        *   `homelab_docs.agents.md`: Homelab documentation guidelines.
-        *   `mkdocs_site_creation.agents.md`: Instructions for creating a new MkDocs-Material site.
-        *   `scripting_guidelines.agents.md`: Gemini scripting guidelines.
-        *   `security_checks.agents.md`: Security-related agent checks.
+## Getting Started
 
-## :checkered_flag: Getting Started
-
-To get started with this project, you need to have Python 3.10+ and Docker installed on your system.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 ### Prerequisites
 
-*   Python 3.10+
-*   Docker
-*   pip
+-   Python 3.11+
+-   [Task](https://taskfile.dev/installation/)
+-   [Docker](https://www.docker.com/get-started) (for containerized deployment)
+-   [pre-commit](https://pre-commit.com/#installation) (for development)
 
 ### Installation
 
-1.  **Create and Activate Virtual Environment:**
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/nicholaswilde/mcp-server.git
+    cd mcp-server
+    ```
+
+2.  **Set up the Python virtual environment:**
     ```bash
     python3 -m venv venv
     source venv/bin/activate
     ```
 
-2.  **Install Dependencies:**
-    First, compile the `requirements.txt` file from `requirements.in`:
+3.  **Install dependencies:**
+    This project uses `pip-tools` to manage dependencies.
     ```bash
-    pip-compile requirements.in
-    ```
-    Then, synchronize your virtual environment with the generated `requirements.txt`:
-    ```bash
-    pip-sync
+    pip install pip-tools
+    task install
     ```
 
-## :hammer_and_wrench: Building and Running
-
-You can run the server using Docker Compose or directly with Uvicorn.
-
-### Using Docker Compose
-
-To run the server with Docker Compose, use the following command:
-
-```bash
-docker compose up
-```
-
-For custom user and group IDs, server port, agents library path, and MCP server settings, you can set the following environment variables in your `compose.yaml` or directly in your shell:
-
-```bash
-PUID=1000 PGID=1000 SERVER_PORT=8080 AGENTS_LIBRARY_PATH=/app/agents-library MCP_SERVER_NAME=mcp-server MCP_SERVER_STREAMABLE_HTTP_PATH=/ MCP_SERVER_JSON_RESPONSE=true docker compose up
-```
-
-**Environment Variables:**
-
-*   `PUID`: User ID for the container process (default: `1000`).
-*   `PGID`: Group ID for the container process (default: `1000`).
-*   `SERVER_PORT`: Port on which the FastAPI server will listen (default: `8080`).
-*   `AGENTS_LIBRARY_PATH`: Path to the agents library within the container (default: `/app/agents-library`).
-*   `MCP_SERVER_NAME`: Name of the MCP server (default: `mcp-server`).
-*   `MCP_SERVER_STREAMABLE_HTTP_PATH`: HTTP path for streamable content (default: `/`).
-*   `MCP_SERVER_JSON_RESPONSE`: Whether to return JSON responses (default: `true`).
-
-### Using Uvicorn
-
-To run the server with Uvicorn, use the following command:
-
-```bash
-uvicorn app.server:app --host 0.0.0.0 --port 8080
-```
-
-## :scroll: Development Conventions
-
-*   **Virtual Environments**: Always use a virtual environment for dependency management.
-*   **Dependencies**: All Python dependencies should be managed using `pip-tools` with `requirements.in` and `requirements.txt`.
-*   **Linting and Formatting**: Ensure code adheres to project style guidelines by running linting and formatting checks.
+4.  **Set up pre-commit hooks:**
+    Install the pre-commit hooks to ensure your commits adhere to the project's code style and quality standards.
     ```bash
-    task lint
-    ```
-*   **Testing**: Run unit tests to verify functionality and prevent regressions.
-    ```bash
-    task test
+    pre-commit install
     ```
 
-## :electric_plug: API Endpoints
+## Usage
 
-The following API endpoints are available:
+You can run the server using Task, which simplifies the process, or with Docker Compose for a containerized environment.
 
-*   `POST /test/call_tool`: Test endpoint for direct tool invocation.
-*   `POST /test/read_resource`: Test endpoint for direct resource invocation.
+### Running the Server Locally
 
-The MCP server also exposes the following tools:
-
-*   `get_agents_instructions`: Retrieves a specific AGENTS.md file for providing AI with instructions and context.
-*   `list_agents_instructions`: Lists all available AGENTS.md files.
-
-## :gemini: Adding to gemini-cli
-
-To add this server to `gemini-cli`, you need to edit your `settings.json` file. You can find this file in `~/.gemini/settings.json` (user settings) or in `.gemini/settings.json` (project settings).
-
-Add the following to your `settings.json` file:
-
-```json
-{
-  "mcpServers": {
-    "sharedAgents": {
-      "httpUrl": "http://<ip-address>:8080"
-    }
-  }
-}
-```
-
-### Using the `mcp` tool
-
-Once the `mcp-server` is configured in `gemini-cli`, you can use the `mcp` tool to interact with the server. For example, to list all available agent instructions:
-
-**Prompt**
-
+To run the FastAPI server on your local machine:
 ```bash
-/mcp list
+task run
 ```
+The server will be available at `http://0.0.0.0:8080`. It will automatically reload when code changes are detected.
 
-**Output**
+### Running with Docker
 
+To build and run the server in a Docker container:
 ```bash
-  🟢 sharedAgents - Ready (2 tools)
-    Tools:
-    - get_agents_instructions
-    - list_agents_instructions
+# Build the multi-platform image and push it
+task build
+
+# Run the container locally
+task docker-run
 ```
+The server will be available at `http://localhost:8080`.
 
-**Prompt**
+### Available Tasks
 
-```bash
-list_agents_instructions
-```
+This project uses `Task` as a command runner. Here are the most common commands:
 
-**Output**
+-   `task install`: Install/sync Python dependencies.
+-   `task run`: Run the FastAPI server locally with auto-reload.
+-   `task lint`: Run linting and formatting checks.
+-   `task test`: Run the unit tests.
+-   `task build`: Build and push the multi-platform Docker image.
+-   `task docker-run`: Run the application in a Docker container.
 
-```
-✔ list_agents_instructions (sharedAgents MCP Server) list_agents_instructions (sharedAgents MCP Server)  
-                                                                                                          
-   {                                                                                                      
-     "files": [                                                                                           
-       "frame_fi",                                                                                        
-       "fantasy_football_ai",                                                                             
-       "security_checks",                                                                                 
-       "dev_rules",                                                                                       
-       "common_prompts",                                                                                  
-       "homelab_docs"                                                                                     
-     ]                                                                                                    
-   }                                                                                                     
-```
+To see all available tasks, run `task -l`.
 
-**Prompt**
+## Contributing
 
-```bash
-get_agents_instructions common_prompts
-```
+Contributions are welcome! Please read the [contributing guidelines](./docs/contributing.md) to get started.
 
-**Output**
+## License
 
-```
-✦ I have retrieved the "common_prompts" instructions. It contains guidelines for creating Markdown
-  documentation and for scripting in Bash and Python.
-```
-
-Example `gemini-cli` prompt to use the `common_prompts` agent to create a bash script.
-
-```bash
-using the get_agents_instructions common_prompts agent, write me a bash script that checks
-downloads the latest release of sops from GitHub with architecture amd64 and linux. 
-```
-
->[!TIP]
->It's important to add the `get_agents_instructions` to the prompt so that `gemini-cli` knows which tool to use to retrieve the remote agent.
-
-Instead of explictly stating to use the mcp agent in every prompt, instruct `gemini-cli` to use the MCP server's `common_prompts` by adding the following to the project's `AGENTS.md` file.
-
-```markdown
-# Agent Instructions
-
-## Bash Scripting Agent Rules
-
-- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `common_prompts` agent whenever a user asks to create or modify a bash script.
-```
-See [reference][1].
-
-## :balance_scale: License
-
-This project is licensed under the [Apache License 2.0](./LICENSE).
-
-## :pencil: Author
-
-This project was started in 2025 by [Nicholas Wilde](https://github.com/nicholaswilde/).
-
-[1]: <https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md>
+This project is licensed under the Apache License 2.0 - see the [LICENSE](./LICENSE) file for details.
