@@ -27,26 +27,25 @@ Please take a moment to review this document to ensure a smooth and effective co
     pip-compile requirements.in
     pip-sync
     ```
-5.  **Make Your Changes:**
+5.  **Set up Pre-Commit Hooks:**
+    This repository uses `pre-commit` to automatically run linters and formatters before each commit.
+    ```bash
+    pre-commit install
+    ```
+6.  **Make Your Changes:**
     Implement your feature or bug fix. Remember to:
     *   Adhere to existing code style and conventions.
     *   Write clear, concise, and well-documented code.
     *   Add or update tests for your changes.
     *   Ensure all existing tests pass.
-    *   Run linting and formatting checks (`task lint`).
 
-6.  **Run Tests:**
+7.  **Run Tests:**
     Before committing, ensure all tests pass.
     ```bash
     task test
     ```
-7.  **Run Linting and Formatting:**
-    Ensure your code adheres to the project's style guidelines.
-    ```bash
-    task lint
-    ```
 8.  **Commit Your Changes:**
-    Write a clear and concise commit message. Follow the Conventional Commits specification (e.g., `feat: Add new feature`, `fix: Resolve bug`).
+    When you commit, the pre-commit hooks will automatically run and may fix formatting issues. If they fail, you'll need to stage the changes and commit again.
     ```bash
     git add .
     git commit -m "feat: Your descriptive commit message"
