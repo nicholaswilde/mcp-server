@@ -32,7 +32,7 @@ jobs:
       # `fetch-depth: 0` is crucial as it fetches the entire git history,
       # which is needed to compare tags and get commit logs.
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
