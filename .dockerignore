@@ -1,0 +1,24 @@
+# Git
+.git
+.gitignore
+.github
+
+# Virtualenv
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Test cache
+.pytest_cache/
+
+# IDE
+.idea/
+.vscode/
+
+# Requirements
+requirements.lock
