@@ -23,16 +23,26 @@ This is a Python project designed to serve as an MCP (Multi-Cloud Platform) serv
 *   `requirements.txt`: Lists Python dependencies.
 *   `app/`:
     *   `server.py`: The main application server.
-    *   `agents-library/`:
-        *   `bash/`: Contains bash scripts.
-            *   `uptime.sh`: Example uptime script.
-        *   `markdown/`: Contains markdown agent instruction files.
-            *   `common_prompts.agents.md`: Common prompts for agents.
-            *   `dev_rules.agents.md`: Development-related agent rules.
-            *   `fantasy_football_ai.agents.md`: Git commit and tagging conventions.
-            *   `frame_fi.agents.md`: Bash and Python scripting guidelines.
-            *   `homelab_docs.agents.md`: Markdown documentation guidelines.
-            *   `security_checks.agents.md`: Security-related agent checks.
+*   `agents-library/`:
+    *   `bash/`: Contains bash scripts.
+        *   `cost_optimizer.sh`: Analyzes cloud resource usage and suggests cost-saving opportunities.
+        *   `deploy_app.sh`: Deploys a specified application to a target environment.
+        *   `health_check.sh`: Performs health checks on deployed applications or infrastructure components.
+        *   `list_markdown_files.sh`: Lists all markdown files in the `agents-library/markdown/` directory.
+        *   `manage_resource.sh`: Manages a specified cloud resource (create, delete, update).
+        *   `monitor_logs.sh`: Fetches and filters logs from various cloud logging services.
+        *   `uptime.sh`: Checks the system uptime.
+    *   `markdown/`: Contains markdown agent instruction files.
+        *   `cloud_best_practices.agents.md`: Guidelines for cloud best practices.
+        *   `common_prompts.agents.md`: Common prompts for agents.
+        *   `dev_rules.agents.md`: Development-related agent rules.
+        *   `docs_guidelines.agents.md`: Markdown documentation guidelines.
+        *   `fantasy_football_ai.agents.md`: Git commit and tagging conventions.
+        *   `frame_fi.agents.md`: Bash and Python scripting guidelines.
+        *   `homelab_docs.agents.md`: Homelab documentation guidelines.
+        *   `mkdocs_site_creation.agents.md`: Instructions for creating a new MkDocs-Material site.
+        *   `scripting_guidelines.agents.md`: Gemini scripting guidelines.
+        *   `security_checks.agents.md`: Security-related agent checks.
 
 ## :checkered_flag: Getting Started
 
