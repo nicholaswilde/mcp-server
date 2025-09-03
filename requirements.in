@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+mcp
+pytest
+httpx
+pytest-asyncio
+pyyaml

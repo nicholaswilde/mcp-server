@@ -1,0 +1,61 @@
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # Pyflakes
+    "I",  # isort
+    "N",  # pep8-naming
+    "D",  # pydocstyle
+    "UP", # pyupgrade
+    "ANN", # flake8-annotations
+    "ASYNC", # flake8-async
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "G",  # flake8-logging-format
+    "PIE", # flake8-pie
+    "PT", # flake8-pytest-style
+    "R",  # flake8-return
+    "SIM", # flake8-simplify
+    "TID", # flake8-tidy-imports
+    "ARG", # flake8-unused-arguments
+    "ERA", # eradicate
+    "PD", # pandas-vet
+    "PGH", # pygrep-hooks
+    "PL", # Pylint
+    "PLE", # Pylint Error
+    "PLW", # Pylint Warning
+    "RUF", # Ruff-specific rules
+]
+ignore = [
+    "D100", # Missing docstring in public module
+    "D104", # Missing docstring in public package
+    "D105", # Missing docstring in magic method
+    "D107", # Missing docstring in __init__
+    "D203", # 1 blank line required before class docstring
+    "D213", # Multi-line docstring should start on the second line
+    "D406", # Section name should end with a period
+    "D407", # Missing period at the end of the first line
+    "D413", # Missing blank line after last section
+    "D416", # Section name should end with a period
+    "ANN101", # Missing type annotation for self in method
+    "ANN102", # Missing type annotation for cls in classmethod
+    "ANN401", # Dynamically typed expressions (any) are disallowed
+    "PLR0913", # Too many arguments in function
+    "PLR0912", # Too many branches
+    "PLR0915", # Too many statements
+    "PLW2901", # Outer loop variable overwritten by inner loop
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "tests"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]

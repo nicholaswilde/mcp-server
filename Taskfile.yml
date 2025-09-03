@@ -24,7 +24,7 @@ tasks:
   install:
     desc: "Install Python dependencies"
     cmds:
-      - ./venv/bin/pip install -r requirements.txt
+      - ./venv/bin/pip-sync
 
   run:
     desc: "Run the FastAPI server"
@@ -36,9 +36,10 @@ tasks:
     ignore_error: true
 
   lint:
-    desc: "Run linting checks"
+    desc: "Run linting and formatting checks"
     cmds:
-      - echo "No linting configured yet." # TODO: Add actual linting command (e.g., ruff, flake8)
+      - ./venv/bin/ruff check .
+      - ./venv/bin/ruff format . --check # Use --check in CI to only verify formatting
 
   build:
     desc: "Build and push the Docker image for multiple architectures (amd64, arm64)"

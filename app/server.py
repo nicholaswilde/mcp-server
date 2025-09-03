@@ -1,22 +1,23 @@
-import os
-import uvicorn
-import subprocess
 import asyncio
-import yaml
-from pathlib import Path
-from typing import Dict, AsyncIterator
+import os
+import subprocess
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
+
+import uvicorn
+import yaml
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 from mcp.server import FastMCP
+from mcp.server.fastmcp.exceptions import ResourceError, ToolError
 from mcp.server.fastmcp.resources import FunctionResource
-from mcp.server.fastmcp.exceptions import ToolError, ResourceError, ResourceError
-import shutil
+from pydantic import BaseModel
+
 
 # Configuration
 def load_config():
-    with open("config.yaml", "r") as f:
+    with open("config.yaml") as f:
         cfg = yaml.safe_load(f)
 
     # Override config with environment variables
@@ -25,18 +26,17 @@ def load_config():
             env_var_name = f"{prefix}{key}".upper()
             if isinstance(value, dict):
                 _override_config_with_env(value, f"{env_var_name}_")
-            else:
-                if env_var_name in os.environ:
-                    # Attempt to convert environment variable to the same type as the config value
-                    try:
-                        if isinstance(value, int):
-                            current_config[key] = int(os.environ[env_var_name])
-                        elif isinstance(value, bool):
-                            current_config[key] = os.environ[env_var_name].lower() in ('true', '1', 't', 'y', 'yes')
-                        else:
-                            current_config[key] = os.environ[env_var_name]
-                    except ValueError:
-                        print(f"Warning: Could not convert environment variable {env_var_name} to type of {key}. Using default.")
+            elif env_var_name in os.environ:
+                # Attempt to convert environment variable to the same type as the config value
+                try:
+                    if isinstance(value, int):
+                        current_config[key] = int(os.environ[env_var_name])
+                    elif isinstance(value, bool):
+                        current_config[key] = os.environ[env_var_name].lower() in ('true', '1', 't', 'y', 'yes')
+                    else:
+                        current_config[key] = os.environ[env_var_name]
+                except ValueError:
+                    print(f"Warning: Could not convert environment variable {env_var_name} to type of {key}. Using default.")
         return current_config
 
     return _override_config_with_env(cfg)
@@ -53,7 +53,7 @@ mcp_server = FastMCP(
 )
 
 # A dictionary to store the contents of our AGENTS.md files
-agents_data: Dict[str, str] = {}
+agents_data: dict[str, str] = {}
 
 async def load_agents_data(agents_library_path: Path):
     """Loads all AGENTS.md files into memory."""
@@ -95,7 +95,7 @@ async def load_bash_scripts(agents_library_path: Path):
                     print(f"Error running script {script_path.name}: {stderr.decode().strip()}")
                     raise HTTPException(status_code=500, detail=f"Script execution failed: {stderr.decode().strip()}")
                 return stdout.decode().strip()
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 process.kill()
                 await process.wait()
                 print(f"Error running script {script_path.name}: Timeout after {script_timeout} seconds.")
@@ -132,8 +132,7 @@ async def load_bash_scripts(agents_library_path: Path):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """
-    Context manager for managing the lifespan of the FastAPI application.
+    """Context manager for managing the lifespan of the FastAPI application.
     Handles startup and shutdown events.
     """
     # Get AGENTS_LIBRARY_PATH from environment variable during lifespan startup
@@ -160,7 +159,7 @@ async def tool_error_handler(request: Request, exc: ToolError):
 
 class ToolCallRequest(BaseModel):
     tool_name: str
-    args: Dict
+    args: dict
 
 class ResourceReadRequest(BaseModel):
     uri: str
@@ -172,8 +171,7 @@ async def test_call_tool(request: ToolCallRequest):
 
 @app.get("/health")
 async def health_check():
-    """
-    Health check endpoint.
+    """Health check endpoint.
     """
     return {"status": "ok"}
 
@@ -195,9 +193,8 @@ async def test_read_resource(request: ResourceReadRequest):
     name="get_agents_instructions",
     description="Retrieves a specific AGENTS.md file for providing AI with instructions and context."
 )
-async def get_agents_instructions(name: str) -> Dict[str, str]:
-    """
-    Handler to return the content of a requested AGENTS.md file.
+async def get_agents_instructions(name: str) -> dict[str, str]:
+    """Handler to return the content of a requested AGENTS.md file.
     """
     if name in agents_data:
         return {
@@ -210,9 +207,8 @@ async def get_agents_instructions(name: str) -> Dict[str, str]:
     name="list_agents_instructions",
     description="Lists all available AGENTS.md files."
 )
-async def list_agents_instructions() -> Dict[str, list]:
-    """
-    Handler to list all available AGENTS.md files.
+async def list_agents_instructions() -> dict[str, list]:
+    """Handler to list all available AGENTS.md files.
     """
     return {"files": sorted(list(agents_data.keys()))}
 
@@ -221,8 +217,7 @@ async def list_agents_instructions() -> Dict[str, list]:
     description="Updates the content of a specific AGENTS.md file in the agents-library."
 )
 async def update_agents_file(file_name: str, new_content: str) -> str:
-    """
-    Handler to update a markdown file in the agents-library.
+    """Handler to update a markdown file in the agents-library.
 
     Args:
         file_name: The name of the file to update (e.g., 'common_prompts').
@@ -237,10 +232,10 @@ async def update_agents_file(file_name: str, new_content: str) -> str:
 
     # Define the base directory for agents and ensure the file is in the markdown subdirectory
     target_dir = AGENTS_LIBRARY_PATH / "markdown"
-    
+
     # Resolve the absolute path of the target directory to prevent path traversal attacks
     safe_target_dir = target_dir.resolve()
-    
+
     # Construct the full file path and resolve it to its absolute path
     file_path = (target_dir / file_name).resolve()
 

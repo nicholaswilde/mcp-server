@@ -53,8 +53,13 @@ To get started with this project, you need to have Python 3.10+ and Docker insta
     ```
 
 2.  **Install Dependencies:**
+    First, compile the `requirements.txt` file from `requirements.in`:
     ```bash
-    pip install -r requirements.txt
+    pip-compile requirements.in
+    ```
+    Then, synchronize your virtual environment with the generated `requirements.txt`:
+    ```bash
+    pip-sync
     ```
 
 ## :hammer_and_wrench: Building and Running
@@ -96,7 +101,15 @@ uvicorn app.server:app --host 0.0.0.0 --port 8080
 ## :scroll: Development Conventions
 
 *   **Virtual Environments**: Always use a virtual environment for dependency management.
-*   **Dependencies**: All Python dependencies should be listed in `requirements.txt`.
+*   **Dependencies**: All Python dependencies should be managed using `pip-tools` with `requirements.in` and `requirements.txt`.
+*   **Linting and Formatting**: Ensure code adheres to project style guidelines by running linting and formatting checks.
+    ```bash
+    task lint
+    ```
+*   **Testing**: Run unit tests to verify functionality and prevent regressions.
+    ```bash
+    task test
+    ```
 
 ## :electric_plug: API Endpoints
 

@@ -1,16 +1,17 @@
-import os
-import pytest
-from fastapi.testclient import TestClient
-from pathlib import Path
+import asyncio
 import importlib
 import json
-import asyncio
+import os
 import subprocess
+
+import pytest
+from fastapi import HTTPException  # Added this import
+from fastapi.testclient import TestClient
 from mcp.server.fastmcp.resources import FunctionResource
-from fastapi import HTTPException # Added this import
 
 # Import the app.server module directly
 import app.server
+
 
 @pytest.fixture(scope="module")
 def test_agents_library_path(tmp_path_factory):
@@ -36,7 +37,7 @@ def test_agents_library_path(tmp_path_factory):
 def client(test_agents_library_path):
     """Provides a TestClient for the FastAPI app."""
     # Clear agents_data before each test run to ensure a clean state
-    app.server.agents_data.clear() 
+    app.server.agents_data.clear()
 
     # Reload app.server to ensure the environment variable is picked up
     # test_agents_library_path already sets os.environ["AGENTS_LIBRARY_PATH"]
@@ -75,7 +76,7 @@ echo \"System is up! Project: ${PROJECT_NAME}, MCP Server: ${MCP_SERVER_URL}\"""
                 if process.returncode != 0:
                     raise Exception(f"Script execution failed: {stderr.decode().strip()}")
                 return stdout.decode().strip()
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 process.kill()
                 await process.wait()
                 raise HTTPException(status_code=500, detail=f"Script execution timed out after {script_timeout} seconds.")
@@ -218,7 +219,7 @@ echo "Done sleeping"''')
             if process.returncode != 0:
                 raise HTTPException(status_code=500, detail=f"Script execution failed: {stderr.decode().strip()}") # Modified line
             return stdout.decode().strip()
-        except asyncio.TimeoutError:
+        except TimeoutError:
             process.kill()
             await process.wait()
             raise HTTPException(status_code=500, detail=f"Script execution timed out after {script_timeout} seconds.") # Modified line
