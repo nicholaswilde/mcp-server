@@ -1,9 +1,10 @@
 import asyncio
 import os
 import subprocess
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any
 
 import uvicorn
 import yaml
@@ -16,12 +17,13 @@ from pydantic import BaseModel
 
 
 # Configuration
-def load_config():
+def load_config() -> dict:
+    """Loads configuration from config.yaml and overrides with environment variables."""
     with open("config.yaml") as f:
         cfg = yaml.safe_load(f)
 
     # Override config with environment variables
-    def _override_config_with_env(current_config, prefix=""):
+    def _override_config_with_env(current_config: dict, prefix: str = "") -> dict:
         for key, value in current_config.items():
             env_var_name = f"{prefix}{key}".upper()
             if isinstance(value, dict):
@@ -32,14 +34,24 @@ def load_config():
                     if isinstance(value, int):
                         current_config[key] = int(os.environ[env_var_name])
                     elif isinstance(value, bool):
-                        current_config[key] = os.environ[env_var_name].lower() in ('true', '1', 't', 'y', 'yes')
+                        current_config[key] = os.environ[env_var_name].lower() in (
+                            "true",
+                            "1",
+                            "t",
+                            "y",
+                            "yes",
+                        )
                     else:
                         current_config[key] = os.environ[env_var_name]
                 except ValueError:
-                    print(f"Warning: Could not convert environment variable {env_var_name} to type of {key}. Using default.")
+                    print(
+                        f"Warning: Could not convert environment variable "
+                        f"{env_var_name} to type of {key}. Using default."
+                    )
         return current_config
 
     return _override_config_with_env(cfg)
+
 
 config = load_config()
 SERVER_PORT = int(config["server"]["port"])
@@ -55,7 +67,8 @@ mcp_server = FastMCP(
 # A dictionary to store the contents of our AGENTS.md files
 agents_data: dict[str, str] = {}
 
-async def load_agents_data(agents_library_path: Path):
+
+async def load_agents_data(agents_library_path: Path) -> None:
     """Loads all AGENTS.md files into memory."""
     if not agents_library_path.is_dir():
         print(f"Directory not found: {agents_library_path}")
@@ -71,14 +84,15 @@ async def load_agents_data(agents_library_path: Path):
         except Exception as e:
             print(f"Error loading {file_path}: {e}")
 
-async def load_bash_scripts(agents_library_path: Path):
+
+async def load_bash_scripts(agents_library_path: Path) -> None:
     """Loads all .sh files as resources."""
     if not agents_library_path.is_dir():
         print(f"Directory not found: {agents_library_path}")
         return
 
-    def create_run_script_callable(script_path: Path):
-        async def _run_script(script_timeout: int = 60, **kwargs):
+    def create_run_script_callable(script_path: Path) -> Callable:
+        async def _run_script(script_timeout: int = 60, **kwargs: Any) -> str:
             try:
                 command_args = ["bash", str(script_path)]
                 for key, value in kwargs.items():
@@ -86,20 +100,25 @@ async def load_bash_scripts(agents_library_path: Path):
                     command_args.append(str(value))
 
                 process = await asyncio.create_subprocess_exec(
-                    *command_args,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE
+                    *command_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
                 )
                 stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=script_timeout)
                 if process.returncode != 0:
                     print(f"Error running script {script_path.name}: {stderr.decode().strip()}")
-                    raise HTTPException(status_code=500, detail=f"Script execution failed: {stderr.decode().strip()}")
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"Script execution failed: {stderr.decode().strip()}",
+                    ) from None
                 return stdout.decode().strip()
             except TimeoutError:
                 process.kill()
                 await process.wait()
                 print(f"Error running script {script_path.name}: Timeout after {script_timeout} seconds.")
-                raise HTTPException(status_code=500, detail=f"Script execution timed out after {script_timeout} seconds.")
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Script execution timed out after {script_timeout} seconds.",
+                ) from None
+
         return _run_script
 
     for file_path in agents_library_path.glob("bash/*.sh"):
@@ -117,22 +136,34 @@ async def load_bash_scripts(agents_library_path: Path):
                     schema={
                         "type": "object",
                         "properties": {
-                            "project_name": {"type": "string", "description": "The name of the new project."},
-                            "mcp_server_url": {"type": "string", "description": "The URL of the MCP server (e.g., http://localhost:8080)."},
-                            "script_timeout": {"type": "integer", "description": "Timeout for script execution in seconds (default: 60).", "default": 60}
+                            "project_name": {
+                                "type": "string",
+                                "description": "The name of the new project.",
+                            },
+                            "mcp_server_url": {
+                                "type": "string",
+                                "description": "The URL of the MCP server (e.g., http://localhost:8080).",
+                            },
+                            "script_timeout": {
+                                "type": "integer",
+                                "description": "Timeout for script execution in seconds (default: 60).",
+                                "default": 60,
+                            },
                         },
                         "required": [],
-                        "additionalProperties": True
-                    }
+                        "additionalProperties": True,
+                    },
                 )
             )
             print(f"Loaded bash script: {file_path.name} as resource '{resource_uri}'")
         except Exception as e:
             print(f"Error loading {file_path}: {e}")
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Context manager for managing the lifespan of the FastAPI application.
+
     Handles startup and shutdown events.
     """
     # Get AGENTS_LIBRARY_PATH from environment variable during lifespan startup
@@ -146,38 +177,48 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         yield
     # Clean up / shutdown events can go here if needed
 
+
 app = FastAPI(lifespan=lifespan)
 
+
 @app.exception_handler(ToolError)
-async def tool_error_handler(request: Request, exc: ToolError):
+async def tool_error_handler(_request: Request, exc: ToolError) -> JSONResponse:
+    """Handles ToolError exceptions and returns a JSONResponse."""
     return JSONResponse(
         status_code=500,
-        content={
-            "detail": f"Tool execution failed: {exc}"
-        },
+        content={"detail": f"Tool execution failed: {exc}"},
     )
 
+
 class ToolCallRequest(BaseModel):
+    """Represents a request to call a tool."""
+
     tool_name: str
     args: dict
 
+
 class ResourceReadRequest(BaseModel):
+    """Represents a request to read a resource."""
+
     uri: str
+
 
 # Temporary test endpoints for direct tool/resource invocation
 @app.post("/test/call_tool")
-async def test_call_tool(request: ToolCallRequest):
+async def test_call_tool(request: ToolCallRequest) -> Any:
+    """Tests calling a tool with the given request."""
     return await mcp_server.call_tool(request.tool_name, request.args)
 
+
 @app.get("/health")
-async def health_check():
-    """Health check endpoint.
-    """
+async def health_check() -> dict:
+    """Health check endpoint."""
     return {"status": "ok"}
 
 
 @app.post("/test/read_resource")
-async def test_read_resource(request: ResourceReadRequest):
+async def test_read_resource(request: ResourceReadRequest) -> dict:
+    """Tests reading a resource with the given request."""
     try:
         # The read_resource returns an Iterable[ReadResourceContents]
         # For testing, we'll just get the first item's content
@@ -187,34 +228,29 @@ async def test_read_resource(request: ResourceReadRequest):
             return {"content": contents[0].content, "mime_type": contents[0].mime_type}
         raise HTTPException(status_code=404, detail="Resource content not found.")
     except ResourceError as e:
-        raise HTTPException(status_code=500, detail=f"Resource error: {e}")
+        raise HTTPException(status_code=500, detail=f"Resource error: {e}") from e
+
 
 @mcp_server.tool(
     name="get_agents_instructions",
-    description="Retrieves a specific AGENTS.md file for providing AI with instructions and context."
+    description="Retrieves a specific AGENTS.md file for providing AI with instructions and context.",
 )
 async def get_agents_instructions(name: str) -> dict[str, str]:
-    """Handler to return the content of a requested AGENTS.md file.
-    """
+    """Handler to return the content of a requested AGENTS.md file."""
     if name in agents_data:
-        return {
-            "content": agents_data[name],
-            "content_type": "text/markdown"
-        }
+        return {"content": agents_data[name], "content_type": "text/markdown"}
     raise HTTPException(status_code=404, detail=f"AGENTS.md file '{name}' not found.")
 
-@mcp_server.tool(
-    name="list_agents_instructions",
-    description="Lists all available AGENTS.md files."
-)
+
+@mcp_server.tool(name="list_agents_instructions", description="Lists all available AGENTS.md files.")
 async def list_agents_instructions() -> dict[str, list]:
-    """Handler to list all available AGENTS.md files.
-    """
-    return {"files": sorted(list(agents_data.keys()))}
+    """Handler to list all available AGENTS.md files."""
+    return {"files": sorted(agents_data.keys())}
+
 
 @mcp_server.tool(
     name="update_agents_file",
-    description="Updates the content of a specific AGENTS.md file in the agents-library."
+    description="Updates the content of a specific AGENTS.md file in the agents-library.",
 )
 async def update_agents_file(file_name: str, new_content: str) -> str:
     """Handler to update a markdown file in the agents-library.
@@ -225,25 +261,25 @@ async def update_agents_file(file_name: str, new_content: str) -> str:
     """
     # Security check: Ensure the file has the correct extension
     if not file_name.endswith(".agents.md"):
-        raise HTTPException(
-            status_code=403,
-            detail="File must end with '.agents.md'."
-        )
+        raise HTTPException(status_code=403, detail="File must end with '.agents.md'.")
 
-    # Define the base directory for agents and ensure the file is in the markdown subdirectory
+    # Define the base directory for agents and ensure the file is in the markdown
+    # subdirectory
     target_dir = AGENTS_LIBRARY_PATH / "markdown"
 
-    # Resolve the absolute path of the target directory to prevent path traversal attacks
+    # Resolve the absolute path of the target directory to prevent path traversal
+    # attacks
     safe_target_dir = target_dir.resolve()
 
     # Construct the full file path and resolve it to its absolute path
     file_path = (target_dir / file_name).resolve()
 
-    # Security check: Ensure the resolved file path is within the safe target directory
+    # Security check: Ensure the resolved file path is within the safe target
+    # directory
     if not str(file_path).startswith(str(safe_target_dir)):
         raise HTTPException(
             status_code=403,
-            detail=f"Access denied: '{file_name}' is not in the allowed directory."
+            detail=f"Access denied: '{file_name}' is not in the allowed directory.",
         )
 
     try:
@@ -255,7 +291,8 @@ async def update_agents_file(file_name: str, new_content: str) -> str:
 
         return f"Successfully updated '{file_name}'."
     except Exception as e:
-        raise ToolError(f"Error updating file '{file_name}': {e}")
+        raise ToolError(f"Error updating file '{file_name}': {e}") from e
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=SERVER_PORT)

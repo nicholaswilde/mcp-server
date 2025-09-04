@@ -135,18 +135,18 @@ list_agents_instructions
 **Output**
 
 ```
-✔ list_agents_instructions (sharedAgents MCP Server) list_agents_instructions (sharedAgents MCP Server)  
+✔ list_agents_instructions (sharedAgents MCP Server) list_agents_instructions (sharedAgents MCP Server)
 
-   {                                                                                                      
-     "files": [                                                                                           
-       "frame_fi",                                                                                        
-       "fantasy_football_ai",                                                                             
-       "security_checks",                                                                                 
-       "dev_rules",                                                                                       
-       "common_prompts",                                                                                  
-       "homelab_docs"                                                                                     
-     ]                                                                                                    
-   }                                                                                                     
+   {
+     "files": [
+       "frame_fi",
+       "fantasy_football_ai",
+       "security_checks",
+       "dev_rules",
+       "common_prompts",
+       "homelab_docs"
+     ]
+   }
 ```
 
 **Prompt**
@@ -166,7 +166,7 @@ Example `gemini-cli` prompt to use the `common_prompts` agent to create a bash s
 
 ```bash
 using the get_agents_instructions common_prompts agent, write me a bash script that checks
-downloads the latest release of sops from GitHub with architecture amd64 and linux. 
+downloads the latest release of sops from GitHub with architecture amd64 and linux.
 ```
 
 >[!TIP]

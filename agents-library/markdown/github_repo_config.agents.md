@@ -69,4 +69,3 @@ The `renovate.json` file configures Renovate Bot to automate dependency updates 
   }
 }
 ```
-

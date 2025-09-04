@@ -38,6 +38,9 @@ jobs:
     - name: Run linting and formatting checks
       run: |
         task lint
+    - name: Run ruff on server.py
+      run: |
+        ./venv/bin/ruff app/server.py
     - name: Run tests
       run: |
         PYTHONPATH=$GITHUB_WORKSPACE pytest $GITHUB_WORKSPACE/tests/test_server.py

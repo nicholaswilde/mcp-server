@@ -1,5 +1,5 @@
 [tool.ruff]
-line-length = 88
+line-length = 120
 target-version = "py311"
 
 [tool.ruff.lint]
@@ -41,8 +41,6 @@ ignore = [
     "D407", # Missing period at the end of the first line
     "D413", # Missing blank line after last section
     "D416", # Section name should end with a period
-    "ANN101", # Missing type annotation for self in method
-    "ANN102", # Missing type annotation for cls in classmethod
     "ANN401", # Dynamically typed expressions (any) are disallowed
     "PLR0913", # Too many arguments in function
     "PLR0912", # Too many branches

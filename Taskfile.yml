@@ -5,58 +5,69 @@ vars:
   VER: '2.5'
   SOURCE: 'source venv/bin/activate'
   DOCKER_REPO: 'nicholaswilde/mcp-server'
-  
+
 tasks:
+  build:
+    desc: "Build and push the Docker image for multiple architectures (amd64, arm64)."
+    cmds:
+      - docker buildx build --platform linux/amd64,linux/arm64 -t {{ .DOCKER_REPO }}:latest --push .
+  compile:
+    desc: "Compile requirements.in to update requirements.txt."
+    cmds:
+      - ./venv/bin/pip-compile requirements.in
+  default:
+    desc: "List all available tasks."
+    cmds:
+      - task -l
+    silent: true
+  docker-run:
+    desc: "Run the Docker container."
+    cmds:
+      - docker run -p 8080:8080 {{ .DOCKER_REPO }}
   gflash:
-    desc: Run Gemini with the gemini-2.5-flash model.
+    desc: "Run Gemini with the gemini-{{ .VER }}-flash model."
     cmds:
       - gemini -m gemini-{{ .VER }}-flash
   glite:
-    desc: Run Gemini with the gemini-2.5-flash-lite model.
+    desc: "Run Gemini with the gemini-{{ .VER }}-flash-lite model."
     cmds:
       - gemini -m gemini-{{ .VER }}-flash-lite
-
   gpro:
-    desc: 'Run Gemini with the gemini-{{ .VER }}-pro model.'
+    desc: "Run Gemini with the gemini-{{ .VER }}-pro model."
     cmds:
       - gemini -m gemini-{{ .VER }}-pro
-
   install:
-    desc: "Install Python dependencies"
+    desc: "Install Python dependencies using pip-sync."
     cmds:
       - ./venv/bin/pip-sync
-
+  install-pre-commit:
+    desc: "Install pre-commit hooks for the repository."
+    cmds:
+      - pre-commit install
+  lint:
+    desc: "Run linting and formatting checks using ruff."
+    cmds:
+      - ./venv/bin/ruff check .
+      - ./venv/bin/ruff format . --check # Use --check in CI to only verify formatting
+  pre-commit-run:
+    desc: "Run all pre-commit hooks on all files."
+    cmds:
+      - pre-commit run --all-files
+  ruff:
+    desc: "Run ruff checks and formatting."
+    cmds:
+      - ./venv/bin/ruff check . --fix
+      - ./venv/bin/ruff format .
   run:
-    desc: "Run the FastAPI server"
+    desc: "Run the FastAPI server locally."
     env:
       AGENTS_LIBRARY_PATH: "{{ .TASKFILE_DIR }}/agents-library"
     cmds:
       - |
         {{ .TASKFILE_DIR }}/venv/bin/python -m uvicorn app.server:app --host 0.0.0.0 --port 8080 --reload
     ignore_error: true
-
-  lint:
-    desc: "Run linting and formatting checks"
-    cmds:
-      - ./venv/bin/ruff check .
-      - ./venv/bin/ruff format . --check # Use --check in CI to only verify formatting
-
-  build:
-    desc: "Build and push the Docker image for multiple architectures (amd64, arm64)"
-    cmds:
-      - docker buildx build --platform linux/amd64,linux/arm64 -t {{ .DOCKER_REPO }}:latest --push .
-
-  docker-run:
-    desc: "Run the Docker container"
-    cmds:
-      - docker run -p 8080:8080 {{ .DOCKER_REPO }}
-
   test:
-    desc: "Run Python unit tests"
+    desc: "Run Python unit tests using pytest."
     cmds:
       - |
         PYTHONPATH=. ./venv/bin/pytest tests/test_server.py
-  default:
-    cmds:
-      - task -l
-    silent: true
