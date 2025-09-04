@@ -140,7 +140,7 @@ list_agents_instructions
    {
      "files": [
        "frame_fi",
-       "fantasy_football_ai",
+       "git",
        "security_checks",
        "dev_rules",
        "common_prompts",
@@ -195,9 +195,9 @@ Instead of explictly stating to use the mcp agent in every prompt, instruct `gem
 
 - **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `docs_guidelines` agent when creating or modifying documentation.
 
-## Fantasy Football AI Agent Rules
+## Git Agent Rules
 
-- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `fantasy_football_ai` agent for fantasy football related queries.
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `git` agent for git-related queries.
 
 ## Frame.fi Agent Rules
 
