@@ -10,6 +10,7 @@ As an AI assistant, I will adhere to the following guidelines when working with 
 ## :material-shield: SOPS Encryption
 
 -   All `.env` files containing sensitive information **MUST** be encrypted using [SOPS](https://github.com/getsops/sops).
+-   Encrypted files should consistently end with the `.enc` extension (e.g., `.env.enc`, `secrets.yaml.enc`).
 -   SOPS allows for encryption of files using various key management systems (KMS), such as AWS KMS, GCP KMS, Azure Key Vault, or PGP/Age keys.
 -   The encrypted `.env` file should be named `.<environment>.env.enc` (e.g., `.env.prod.enc`, `.env.dev.enc`).
 

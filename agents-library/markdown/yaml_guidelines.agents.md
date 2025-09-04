@@ -14,6 +14,7 @@ As an AI assistant, I will adhere to the following guidelines when creating or m
 -   **Lists (Sequences):** Use a hyphen followed by a space (`- `) for list items.
 -   **Comments:** Use comments (`#`) to explain non-obvious configurations or important details.
 -   **Structure:** Maintain a clear and logical structure. Group related items together.
+-   **Template Files:** If a YAML file serves as a template (e.g., for configuration generation), it should end with the `.tmpl` extension (e.g., `config.yaml.tmpl`).
 
 ### Example
 
