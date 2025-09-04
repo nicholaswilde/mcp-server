@@ -34,3 +34,10 @@ All git tags will follow the Semantic Versioning specification. The version numb
 -   **Z**: Patch version
 
 I will use my best judgment to determine the appropriate version number based on the changes that have been made since the last tag.
+
+## GPG Signing
+
+- All commits and tags **MUST** be signed with a GPG key to ensure authenticity and integrity.
+- Configure Git to sign commits automatically: `git config --global commit.gpgsign true`
+- Configure Git to sign tags automatically: `git config --global tag.gpgsign true`
+- Ensure your GPG key is properly configured and trusted on your system.

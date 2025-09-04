@@ -50,3 +50,34 @@ This document outlines general cloud best practices that agents should adhere to
 *   Set up appropriate alerts for anomalies, errors, and performance thresholds.
 *   Ensure alerts are actionable and routed to the correct teams.
 *   Refer to the `monitor_logs.sh` and `health_check.sh` scripts for automated log retrieval and health checks.
+
+## 6. Security
+
+**Importance**: Cloud security is a shared responsibility. Agents must adhere to security best practices to protect data, applications, and infrastructure.
+
+**Guidelines**:
+*   Implement the principle of least privilege for all access controls.
+*   Encrypt data at rest and in transit.
+*   Regularly audit configurations and access logs.
+*   Utilize security services provided by cloud providers (e.g., WAF, DDoS protection).
+*   Refer to the `security_scan.sh` script for initiating various types of security scans.
+
+## 7. Automation
+
+**Importance**: Automating cloud operations reduces manual effort, minimizes human error, and increases efficiency and consistency.
+
+**Guidelines**:
+*   Automate resource provisioning and de-provisioning using Infrastructure as Code (IaC).
+*   Automate deployment pipelines for applications.
+*   Automate routine operational tasks (e.g., backups, patching).
+*   Refer to scripts like `manage_resource.sh`, `deploy_app.sh`, and `scale_resource.sh` for automated resource management and deployment.
+
+## 8. Data Management and Backup
+
+**Importance**: Proper data management, including regular backups and disaster recovery planning, is crucial for business continuity and data integrity.
+
+**Guidelines**:
+*   Implement a robust backup strategy (e.g., 3-2-1 rule).
+*   Regularly test data recovery procedures.
+*   Classify data and apply appropriate protection measures.
+*   Refer to the `backup_data.sh` script for automating data backup processes.

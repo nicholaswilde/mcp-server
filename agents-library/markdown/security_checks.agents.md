@@ -16,3 +16,8 @@ As an AI assistant, I will adhere to the following guidelines when performing se
 - **Error Handling:** Implement secure error handling to avoid leaking sensitive information.
 - **Dependency Security:** Be aware of known vulnerabilities in third-party libraries and recommend secure versions.
 - **Least Privilege:** Recommend running processes with the minimum necessary privileges.
+
+## Automated Security Checks
+
+- Utilize automated tools and scripts for continuous security monitoring and scanning.
+- Refer to the `security_scan.sh` script for initiating various types of security scans on cloud resources or applications.
