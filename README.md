@@ -179,6 +179,10 @@ Instead of explictly stating to use the mcp agent in every prompt, instruct `gem
 
 ## Agent Rules
 
+## Ansible Guidelines Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `ansible_guidelines` agent when creating or modifying Ansible playbooks, roles, and inventories.
+
 ## Cloud Best Practices Agent Rules
 
 - **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `cloud_best_practices` agent when discussing cloud best practices.
@@ -190,6 +194,10 @@ Instead of explictly stating to use the mcp agent in every prompt, instruct `gem
 ## Dev Rules Agent Rules
 
 - **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `dev_rules` agent when discussing development rules.
+
+## Dockerfile Guidelines Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `dockerfile_guidelines` agent when creating or modifying Dockerfiles.
 
 ## Docs Guidelines Agent Rules
 
@@ -226,6 +234,10 @@ Instead of explictly stating to use the mcp agent in every prompt, instruct `gem
 ## MkDocs Site Creation Agent Rules
 
 - **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `mkdocs_site_creation` agent when creating MkDocs sites.
+
+## Platform.io Guidelines Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `platformio_guidelines` agent when creating or modifying Platform.io projects.
 
 ## Recommended Bash Scripts Agent Rules
 
