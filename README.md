@@ -243,9 +243,13 @@ Instead of explictly stating to use the mcp agent in every prompt, instruct `gem
 
 - **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `recommended_bash_scripts` agent when recommending bash scripts.
 
-## Scripting Guidelines Agent Rules
+## Bash Guidelines Agent Rules
 
-- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `scripting_guidelines` agent when discussing scripting guidelines.
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `bash_guidelines` agent when discussing bash scripting guidelines.
+
+## Python Guidelines Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `python_guidelines` agent when discussing python scripting guidelines.
 
 ## Security Checks Agent Rules
 
