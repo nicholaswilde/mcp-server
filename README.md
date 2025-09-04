@@ -211,6 +211,18 @@ Instead of explictly stating to use the mcp agent in every prompt, instruct `gem
 
 - **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `homelab_docs` agent for homelab documentation.
 
+## .env and SOPS Guidelines Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `env_sops_guidelines` agent when working with `.env` files and SOPS encryption.
+
+## MkDocs-Material Guidelines Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `mkdocs_material_guidelines` agent when creating or modifying MkDocs-Material documentation.
+
+## README.md Guidelines Agent Rules
+
+- **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `readme_guidelines` agent when creating or modifying `README.md` files.
+
 ## MkDocs Site Creation Agent Rules
 
 - **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `mkdocs_site_creation` agent when creating MkDocs sites.
