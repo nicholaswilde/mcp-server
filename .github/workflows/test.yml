@@ -41,7 +41,7 @@ jobs:
     #     task lint
     - name: Run ruff on server.py
       run: |
-        ruff .
+        ruff check .
         ruff format . --check
     - name: Run tests
       run: |
