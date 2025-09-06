@@ -36,12 +36,13 @@ jobs:
       with:
         version: 3.x
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Run linting and formatting checks
-      run: |
-        task lint
+    # - name: Run linting and formatting checks
+    #   run: |
+    #     task lint
     - name: Run ruff on server.py
       run: |
-        ruff app/server.py
+        ruff .
+        ruff format . --check
     - name: Run tests
       run: |
         PYTHONPATH=$GITHUB_WORKSPACE pytest $GITHUB_WORKSPACE/tests/test_server.py
