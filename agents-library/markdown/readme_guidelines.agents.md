@@ -12,7 +12,6 @@ As an AI assistant, I will adhere to the following guidelines when creating or m
 -   Include information about contributing to the project.
 -   Mention the license.
 -   Credit the author(s).
--   Ensure that the 'License' and 'Author(s)' sections are the last two sections on the page, in that order.
 
 ## :art: Structure and Content
 
@@ -25,5 +24,5 @@ As an AI assistant, I will adhere to the following guidelines when creating or m
 -   **Usage:** How to use the project, with examples.
 -   **Available Tasks/Commands:** If applicable, list common commands or tasks.
 -   **Contributing:** Guidelines for contributions.
--   **License:** Licensing information. This should be the second to last section.
--   **Author(s):** Project author(s) and contact information. This should be the last section.
+-   **License:** Licensing information.
+-   **Author(s):** Project author(s) and contact information.
