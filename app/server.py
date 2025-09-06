@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import subprocess
 from collections.abc import AsyncIterator, Callable
@@ -14,7 +15,7 @@ from fastapi.security import APIKeyHeader
 from mcp.server import FastMCP
 from mcp.server.fastmcp.exceptions import ResourceError, ToolError
 from mcp.server.fastmcp.resources import FunctionResource
-from pydantic import BaseModel, Field
+from mcp.types import TextContent
 
 
 # Configuration
@@ -78,11 +79,24 @@ async def get_api_key(api_key: str = Security(api_key_header)) -> str | None:
     if SECURITY_ENABLED:
         if not api_key or api_key not in API_KEYS:
             raise HTTPException(status_code=403, detail="Invalid or missing API key")
+    elif api_key is None:
+        return None
     return api_key
 
 
 # A dictionary to store the contents of our AGENTS.md files
 agents_data: dict[str, str] = {}
+
+
+def convert_text_content_to_str(data: Any) -> Any:
+    """Converts TextContent objects within a data structure to strings."""
+    if isinstance(data, TextContent):
+        return data.text
+    if isinstance(data, dict):
+        return {k: convert_text_content_to_str(v) for k, v in data.items()}
+    if isinstance(data, list):
+        return [convert_text_content_to_str(item) for item in data]
+    return data
 
 
 def create_app() -> FastAPI:
@@ -123,19 +137,15 @@ def create_app() -> FastAPI:
                     for key, value in kwargs.items():
                         command_args.append(f"--{key}")
                         command_args.append(str(value))
-                    
+
                     print(f"Command args: {command_args}")
 
                     process = await asyncio.create_subprocess_exec(
                         *command_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
                     )
-                    stdout, stderr = await asyncio.wait_for(
-                        process.communicate(), timeout=script_timeout
-                    )
+                    stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=script_timeout)
                     if process.returncode != 0:
-                        print(
-                            f"Error running script {script_path.name}: {stderr.decode().strip()}"
-                        )
+                        print(f"Error running script {script_path.name}: {stderr.decode().strip()}")
                         raise HTTPException(
                             status_code=500,
                             detail=f"Script execution failed: {stderr.decode().strip()}",
@@ -144,12 +154,8 @@ def create_app() -> FastAPI:
                 except TimeoutError:
                     process.kill()
                     await process.wait()
-                    print(
-                        f"Error running script {script_path.name}: Timeout after {script_timeout} seconds."
-                    )
-                    raise ResourceError(
-                        f"Script execution timed out after {script_timeout} seconds."
-                    ) from None
+                    print(f"Error running script {script_path.name}: Timeout after {script_timeout} seconds.")
+                    raise ResourceError(f"Script execution timed out after {script_timeout} seconds.") from None
 
             return _run_script
 
@@ -187,9 +193,7 @@ def create_app() -> FastAPI:
                         },
                     )
                 )
-                print(
-                    f"Loaded bash script: {file_path.name} as resource '{resource_uri}'"
-                )
+                print(f"Loaded bash script: {file_path.name} as resource '{resource_uri}'")
             except Exception as e:
                 print(f"Error loading {file_path}: {e}")
 
@@ -200,9 +204,7 @@ def create_app() -> FastAPI:
         Handles startup and shutdown events.
         """
         # Get AGENTS_LIBRARY_PATH from environment variable during lifespan startup
-        agents_library_path = Path(
-            os.environ.get("AGENTS_LIBRARY_PATH", "/app/agents-library")
-        )
+        agents_library_path = Path(os.environ.get("AGENTS_LIBRARY_PATH", "/app/agents-library"))
         await _load_agents_data(agents_library_path)
         await _load_bash_scripts(agents_library_path)
         mcp_app = mcp_server.streamable_http_app()
@@ -222,33 +224,48 @@ def create_app() -> FastAPI:
             content={"detail": f"Tool execution failed: {exc}"},
         )
 
-    class ToolCallRequest(BaseModel):
-        """Represents a request to call a tool."""
-
-        tool_name: str
-        args: dict
-
-    class ResourceReadRequest(BaseModel):
-        """Represents a request to read a resource."""
-
-        uri: str
-        args: dict = {}
-
-    # Temporary test endpoints for direct tool/resource invocation
     @app.post("/test/call_tool")
     async def test_call_tool(
-        request: ToolCallRequest,
-        api_key: str | None = Depends(get_api_key),
+        request_data: dict,
+        api_key: str | None = Depends(get_api_key),  # Re-add the dependency # noqa: ARG001
     ) -> Any:
         """Tests calling a tool with the given request."""
-        return await mcp_server.call_tool(request.tool_name, request.args)
+        tool_call_request = request_data.get("tool_call_request", {})
+        tool_name = tool_call_request.get("tool_name")
+        args = tool_call_request.get("args", {})
+
+        if not tool_name:
+            raise HTTPException(status_code=422, detail="tool_name is required")
+
+        try:
+            raw_result = await mcp_server.call_tool(tool_name, args)
+
+            # Extract the TextContent object from the tuple
+            result = raw_result[0][0] if isinstance(raw_result, tuple) and len(raw_result[0]) > 0 else raw_result
+
+            response_content = {}
+            if isinstance(result, TextContent):
+                try:
+                    json_data = json.loads(result.text)
+                    response_content = {"type": "json", "content": json_data}
+                except json.JSONDecodeError:
+                    response_content = {"type": "text", "content": result.text}
+
+            return JSONResponse(status_code=200, content=response_content)
+        except HTTPException as e:
+            return JSONResponse(status_code=e.status_code, content={"detail": e.detail})
+        except ToolError as e:
+            if isinstance(e.__cause__, HTTPException):
+                return JSONResponse(
+                    status_code=e.__cause__.status_code,
+                    content={"detail": e.__cause__.detail},
+                )
+            return JSONResponse(status_code=500, content={"detail": str(e)})
 
     @app.get("/health")
     async def health_check() -> dict:
         """Health check endpoint."""
         return {"status": "ok"}
-
-    
 
     @mcp_server.tool(
         name="get_agents_instructions",
@@ -256,22 +273,17 @@ def create_app() -> FastAPI:
     )
     async def get_agents_instructions(
         name: str,
-        api_key: str | None = Depends(get_api_key),
     ) -> dict[str, str]:
         """Handler to return the content of a requested AGENTS.md file."""
         if name in agents_data:
             return {"content": agents_data[name], "content_type": "text/markdown"}
-        raise HTTPException(
-            status_code=404, detail=f"AGENTS.md file '{name}' not found."
-        )
+        raise HTTPException(status_code=404, detail=f"AGENTS.md file '{name}' not found.")
 
     @mcp_server.tool(
         name="list_agents_instructions",
         description="Lists all available AGENTS.md files.",
     )
-    async def list_agents_instructions(
-        api_key: str | None = Depends(get_api_key),
-    ) -> dict[str, list]:
+    async def list_agents_instructions() -> dict[str, list]:
         """Handler to list all available AGENTS.md files."""
         return {"files": sorted(agents_data.keys())}
 
@@ -282,7 +294,6 @@ def create_app() -> FastAPI:
     async def update_agents_file(
         file_name: str,
         new_content: str,
-        api_key: str | None = Depends(get_api_key),
     ) -> str:
         """Handler to update a markdown file in the agents-library.
 
@@ -292,9 +303,7 @@ def create_app() -> FastAPI:
         """
         # Security check: Ensure the file has the correct extension
         if not file_name.endswith(".agents.md"):
-            raise HTTPException(
-                status_code=403, detail="File must end with '.agents.md'."
-            )
+            raise HTTPException(status_code=403, detail="File must end with '.agents.md'.")
 
         # Define the base directory for agents and ensure the file is in the markdown
         # subdirectory

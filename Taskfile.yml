@@ -70,4 +70,4 @@ tasks:
     desc: "Run Python unit tests using pytest."
     cmds:
       - |
-        PYTHONPATH=. ./venv/bin/pytest tests/test_server.py
+        PYTHONPATH=. ./venv/bin/pytest tests/test_server.py -s
