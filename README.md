@@ -66,6 +66,11 @@ task run
 ```
 The server will be available at `http://0.0.0.0:8080`. It will automatically reload when code changes are detected.
 
+To generate a new API key:
+```bash
+python app/server.py --generate-api-key
+```
+
 ### :whale: Running with Docker
 
 To build and run the server in a Docker container:

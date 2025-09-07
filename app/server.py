@@ -342,4 +342,19 @@ app = create_app()
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=SERVER_PORT)
+    import argparse
+    import secrets
+
+    parser = argparse.ArgumentParser(description="MCP Server")
+    parser.add_argument(
+        "--generate-api-key",
+        action="store_true",
+        help="Generate a new API key and print it to stdout.",
+    )
+    args = parser.parse_args()
+
+    if args.generate_api_key:
+        new_key = secrets.token_urlsafe(32)
+        print(f"Generated API Key: {new_key}")
+    else:
+        uvicorn.run(app, host="0.0.0.0", port=SERVER_PORT)
