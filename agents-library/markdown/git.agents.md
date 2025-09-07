@@ -34,3 +34,5 @@ All git tags will follow the Semantic Versioning specification. The version numb
 -   **Z**: Patch version
 
 I will use my best judgment to determine the appropriate version number based on the changes that have been made since the last tag.
+
+When pushing a git commit and tag, use the `--atomic` switch to ensure both are pushed together (e.g., `git push --atomic origin main v0.9.0`).
