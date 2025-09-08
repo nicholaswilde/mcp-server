@@ -46,7 +46,7 @@ To build the server in a Docker container:
 === "Manual"
 
     ```bash
-    ./venv/bin/mkdocs build
+    docker build -t nicholaswilde/mcp-server .
     ```
 
 To run the server in a Docker container:
@@ -60,7 +60,7 @@ To run the server in a Docker container:
 === "Manual"
 
     ```bash
-    ./venv/bin/mkdocs serve
+    docker run -p 8080:8080 nicholaswilde/mcp-server
     ```
 
 The server will be available at `http://localhost:8080`.
