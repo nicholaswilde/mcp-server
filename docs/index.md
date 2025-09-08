@@ -34,11 +34,6 @@ Add to `gemini-cli` settings:
 }
 ```
 
-To generate a new API key:
-```bash
-python app/server.py --generate-api-key
-```
-
 ## :mag: Overview
 
 This server uses FastAPI to expose a set of tools that can be consumed by a compatible AI model (like Google's Gemini). The primary purpose is to provide the AI with a library of standardized instructions (`AGENTS.md` files) and utility scripts (`.sh` files). This allows the AI to perform complex, context-aware tasks consistently by drawing from a central, version-controlled library.

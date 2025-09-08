@@ -38,10 +38,8 @@ def test_agents_library_path(tmp_path_factory: Any) -> Path:
 
 @pytest.fixture
 def client(test_agents_library_path: Path, monkeypatch: Any) -> Generator[TestClient, None, None]:
-    """Provides a TestClient for the FastAPI app with security disabled."""
+    """Provides a TestClient for the FastAPI app."""
     monkeypatch.setattr(app.server, "AGENTS_LIBRARY_PATH", test_agents_library_path)
-    monkeypatch.setattr(app.server, "SECURITY_ENABLED", False)
-    monkeypatch.setattr(app.server, "API_KEYS", [])
 
     app.server.agents_data.clear()
 
@@ -49,29 +47,15 @@ def client(test_agents_library_path: Path, monkeypatch: Any) -> Generator[TestCl
         yield c
 
 
-@pytest.fixture
-def secure_client(test_agents_library_path: Path, monkeypatch: Any) -> Generator[TestClient, None, None]:
-    """Provides a TestClient for the FastAPI app with security enabled."""
-    monkeypatch.setattr(app.server, "AGENTS_LIBRARY_PATH", test_agents_library_path)
-    monkeypatch.setattr(app.server, "SECURITY_ENABLED", True)
-    monkeypatch.setattr(app.server, "API_KEYS", ["test-key"])
-
-    app.server.agents_data.clear()
-
-    with TestClient(app.server.create_app()) as c:
-        yield c
-
-
-# Security disabled tests
-def test_health_check_security_disabled(client: TestClient) -> None:
-    """Test health check endpoint with security disabled."""
+def test_health_check(client: TestClient) -> None:
+    """Test health check endpoint."""
     response = client.get("/health")
     assert response.status_code == HTTPStatus.OK.value
     assert response.json() == {"status": "ok"}
 
 
-def test_call_tool_security_disabled(client: TestClient) -> None:
-    """Test calling a tool with security disabled."""
+def test_call_tool(client: TestClient) -> None:
+    """Test calling a tool."""
     response = client.post(
         "/test/call_tool",
         json={"tool_call_request": {"tool_name": "list_agents_instructions", "args": {}}},
@@ -79,58 +63,6 @@ def test_call_tool_security_disabled(client: TestClient) -> None:
     assert response.status_code == HTTPStatus.OK.value
     assert response.json()["type"] == "json"
     assert response.json()["content"] == {"files": ["common_prompts", "dev_rules", "security_checks"]}
-
-
-def test_call_tool_security_disabled_no_api_key(client: TestClient) -> None:
-    """Test calling a tool with security disabled and no API key provided."""
-    response = client.post(
-        "/test/call_tool",
-        json={"tool_call_request": {"tool_name": "list_agents_instructions", "args": {}}},
-    )
-    assert response.status_code == HTTPStatus.OK.value
-    assert response.json()["type"] == "json"
-    assert response.json()["content"] == {"files": ["common_prompts", "dev_rules", "security_checks"]}
-
-
-# Security enabled tests
-def test_health_check_security_enabled(secure_client: TestClient) -> None:
-    """Test health check endpoint with security enabled (should not require a key)."""
-    response = secure_client.get("/health")
-    assert response.status_code == HTTPStatus.OK.value
-    assert response.json() == {"status": "ok"}
-
-
-def test_call_tool_with_valid_key(secure_client: TestClient) -> None:
-    """Test calling a tool with a valid API key."""
-    response = secure_client.post(
-        "/test/call_tool",
-        json={"tool_call_request": {"tool_name": "list_agents_instructions", "args": {}}},
-        headers={"X-API-Key": "test-key"},
-    )
-    assert response.status_code == HTTPStatus.OK.value
-    assert response.json()["type"] == "json"
-    assert response.json()["content"] == {"files": ["common_prompts", "dev_rules", "security_checks"]}
-
-
-def test_call_tool_with_invalid_key(secure_client: TestClient) -> None:
-    """Test calling a tool with an invalid API key."""
-    response = secure_client.post(
-        "/test/call_tool",
-        json={"tool_call_request": {"tool_name": "list_agents_instructions", "args": {}}},
-        headers={"X-API-Key": "invalid-key"},
-    )
-    assert response.status_code == HTTPStatus.FORBIDDEN.value
-    assert response.json() == {"detail": "Invalid or missing API key"}
-
-
-def test_call_tool_with_missing_key(secure_client: TestClient) -> None:
-    """Test calling a tool with a missing API key."""
-    response = secure_client.post(
-        "/test/call_tool",
-        json={"tool_call_request": {"tool_name": "list_agents_instructions", "args": {}}},
-    )
-    assert response.status_code == HTTPStatus.FORBIDDEN.value
-    assert response.json() == {"detail": "Invalid or missing API key"}
 
 
 @pytest.mark.asyncio

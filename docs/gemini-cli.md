@@ -107,8 +107,6 @@ Instead of explictly stating to use the mcp agent in every prompt, instruct `gem
 
 - **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `dockerfile_guidelines` agent when creating or modifying Dockerfiles.
 
-
-
 ## Git Agent Rules
 
 - **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `git` agent for git-related queries.
@@ -176,3 +174,4 @@ Instead of explictly stating to use the mcp agent in every prompt, instruct `gem
 ## YAML Guidelines Agent Rules
 
 - **ALWAYS** use the `sharedAgents` MCP server's `get_agents_instructions` `yaml_guidelines` agent when creating or modifying YAML files.
+```

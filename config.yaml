@@ -6,9 +6,3 @@ mcp_server:
   name: mcp-server
   streamable_http_path: /
   json_response: true
-
-security:
-  enabled: false
-  api_keys:
-    - "some-secret-key"
-    - "another-secret-key"

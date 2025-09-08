@@ -5,6 +5,8 @@ vars:
   VER: '2.5'
   SOURCE: 'source venv/bin/activate'
   DOCKER_REPO: 'nicholaswilde/mcp-server'
+  IMAGE: 'nicholaswilde/mkdocs-material'
+  PORT: 8000
 
 tasks:
   export:
@@ -12,9 +14,14 @@ tasks:
     cmds:
       - task -l > task-list.txt
   serve:
-    desc: "Serve mkdocs-material"
+    desc: >-
+      Start development server on http://0.0.0.0:{{ .PORT }} using
+      Docker and mkdocs-material
     cmds:
-      -  ./venv/bin/mkdocs serve
+      - >-
+        docker run --rm -it -p {{ .PORT }}:{{ .PORT}} -v ${PWD}:/docs
+        --platform linux/amd64 {{ .IMAGE }} serve
+        --dev-addr 0.0.0.0:{{ .PORT }} -f ./mkdocs.yml
   build:
     desc: "Build and push the Docker image for multiple architectures (amd64, arm64)."
     cmds:
@@ -60,7 +67,7 @@ tasks:
   pre-commit-run:
     desc: "Run all pre-commit hooks on all files."
     cmds:
-      - pre-commit run --all-files
+      - ./venv/bin/pre-commit run --all-files
   ruff:
     desc: "Run ruff checks and formatting."
     cmds:
