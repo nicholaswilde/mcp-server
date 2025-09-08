@@ -1,0 +1,120 @@
+---
+site_name: MCP Server
+site_description: An MCP (Multi-Cloud Platform) server that provides a library of reusable agent instructions and scripts to a generative AI model.
+site_author: Nicholas Wilde
+site_url: https://nicholaswilde.io/mcp-server/ # Placeholder, update with actual URL if deployed
+copyright: Copyright © 2025 Nicholas Wilde
+
+# Repository
+repo_name: nicholaswilde/mcp-server
+repo_url: https://github.com/nicholaswilde/mcp-server
+edit_uri: "edit/main/docs/"
+
+nav:
+  - Home: index.md
+  - "Getting Started": getting-started.md
+  - Usage: usage.md
+  - "Adding to gemini-cli": gemini-cli.md
+  - Contributing: contributing.md
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/solid/house
+      link: https://nicholaswilde.io/
+    - icon: fontawesome/brands/github
+      link: https://github.com/nicholaswilde
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/nicholascwilde
+    - icon: fontawesome/brands/instagram
+      link: https://www.instagram.com/wildewoodworking/
+    - icon: fontawesome/brands/linkedin-in
+      link: https://www.linkedin.com/in/nicholaswilde
+    - icon: fontawesome/brands/facebook
+      link: https://www.facebook.com/nicholas.wilde/
+    - icon: fontawesome/brands/keybase
+      link: https://keybase.io/nicholaswilde
+    - icon: fontawesome/solid/key
+      link: https://github.com/nicholaswilde.gpg
+
+theme:
+  name: material
+  language: en
+  icon:
+    repo: fontawesome/brands/github
+    logo: fontawesome/solid/house-chimney
+  features:
+    - navigation.top
+    - navigation.tracking
+    - navigation.footer
+    - content.code.copy
+    - content.action.edit
+    - content.action.view
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+
+plugins:
+  - search
+  - tags
+  - minify:
+      minify_html: true
+
+markdown_extensions:
+  - admonition
+  - abbr
+  - attr_list
+  - def_list
+  - footnotes
+  - meta
+  - tables
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: nicholaswilde
+      repo: homepage
+  - pymdownx.mark
+  - pymdownx.snippets:
+      base_path:
+        - ./
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde

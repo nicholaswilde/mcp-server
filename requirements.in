@@ -3,6 +3,10 @@ uvicorn
 ruff
 pre-commit
 
+mkdocs
+mkdocs-material
+mkdocs-minify-plugin
+
 mcp
 pytest
 httpx

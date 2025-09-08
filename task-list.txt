@@ -1,0 +1,17 @@
+task: Available tasks for this project:
+* build:                    Build and push the Docker image for multiple architectures (amd64, arm64).
+* compile:                  Compile requirements.in to update requirements.txt.
+* default:                  List all available tasks.
+* docker-run:               Run the Docker container.
+* export:                   Export task  list
+* gflash:                   Run Gemini with the gemini-2.5-flash model.
+* glite:                    Run Gemini with the gemini-2.5-flash-lite model.
+* gpro:                     Run Gemini with the gemini-2.5-pro model.
+* install:                  Install Python dependencies using pip-sync.
+* install-pre-commit:       Install pre-commit hooks for the repository.
+* lint:                     Run linting and formatting checks using ruff.
+* pre-commit-run:           Run all pre-commit hooks on all files.
+* ruff:                     Run ruff checks and formatting.
+* run:                      Run the FastAPI server locally.
+* serve:                    Serve mkdocs-material
+* test:                     Run Python unit tests using pytest.

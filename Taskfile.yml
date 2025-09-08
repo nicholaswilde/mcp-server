@@ -7,6 +7,14 @@ vars:
   DOCKER_REPO: 'nicholaswilde/mcp-server'
 
 tasks:
+  export:
+    desc: "Export task  list"
+    cmds:
+      - task -l > task-list.txt
+  serve:
+    desc: "Serve mkdocs-material"
+    cmds:
+      -  ./venv/bin/mkdocs serve
   build:
     desc: "Build and push the Docker image for multiple architectures (amd64, arm64)."
     cmds:
