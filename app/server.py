@@ -9,9 +9,8 @@ from typing import Any
 
 import uvicorn
 import yaml
-from fastapi import Depends, FastAPI, HTTPException, Request, Security
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
-from fastapi.security import APIKeyHeader
 from mcp.server import FastMCP
 from mcp.server.fastmcp.exceptions import ResourceError, ToolError
 from mcp.server.fastmcp.resources import FunctionResource
@@ -58,30 +57,6 @@ def load_config() -> dict:
 config = load_config()
 SERVER_PORT = int(config["server"]["port"])
 AGENTS_LIBRARY_PATH = Path(config["server"]["agents_library_path"])
-SECURITY_ENABLED = config.get("security", {}).get("enabled", False)
-API_KEYS = config.get("security", {}).get("api_keys", [])
-
-api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
-
-
-async def get_api_key(api_key: str = Security(api_key_header)) -> str | None:
-    """Retrieves and validates an API key from the request headers.
-
-    Args:
-        api_key: The API key from the 'X-API-Key' header.
-
-    Returns:
-        The validated API key.
-
-    Raises:
-        HTTPException: If the API key is invalid or missing and security is enabled.
-    """
-    if SECURITY_ENABLED:
-        if not api_key or api_key not in API_KEYS:
-            raise HTTPException(status_code=403, detail="Invalid or missing API key")
-    elif api_key is None:
-        return None
-    return api_key
 
 
 # A dictionary to store the contents of our AGENTS.md files
@@ -227,7 +202,6 @@ def create_app() -> FastAPI:
     @app.post("/test/call_tool")
     async def test_call_tool(
         request_data: dict,
-        api_key: str | None = Depends(get_api_key),  # Re-add the dependency # noqa: ARG001
     ) -> Any:
         """Tests calling a tool with the given request."""
         tool_call_request = request_data.get("tool_call_request", {})
@@ -342,19 +316,4 @@ app = create_app()
 
 
 if __name__ == "__main__":
-    import argparse
-    import secrets
-
-    parser = argparse.ArgumentParser(description="MCP Server")
-    parser.add_argument(
-        "--generate-api-key",
-        action="store_true",
-        help="Generate a new API key and print it to stdout.",
-    )
-    args = parser.parse_args()
-
-    if args.generate_api_key:
-        new_key = secrets.token_urlsafe(32)
-        print(f"Generated API Key: {new_key}")
-    else:
-        uvicorn.run(app, host="0.0.0.0", port=SERVER_PORT)
+    uvicorn.run(app, host="0.0.0.0", port=SERVER_PORT)
