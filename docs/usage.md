@@ -20,20 +20,6 @@ To run the FastAPI server on your local machine:
 
 The server will be available at `http://0.0.0.0:8080`. It will automatically reload when code changes are detected.
 
-To generate a new API key:
-
-=== "Task"
-
-    ```bash
-    task generate-api-key
-    ```
-
-=== "Manual"
-
-    ```bash
-    python app/server.py --generate-api-key
-    ```
-
 ## :whale: Running with Docker
 
 To build the server in a Docker container:

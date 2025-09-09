@@ -15,6 +15,7 @@ nav:
   - "Getting Started": getting-started.md
   - Usage: usage.md
   - "Adding to gemini-cli": gemini-cli.md
+  - "Agents Library Files": agents-library-files.md
   - Contributing: contributing.md
 
 extra_css:

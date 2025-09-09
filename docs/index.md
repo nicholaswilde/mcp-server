@@ -44,7 +44,7 @@ The core components are:
 
 ## :scales: License
 
-​[​Apache License 2.0](https://raw.githubusercontent.com/nicholaswilde/mcp-server/refs/heads/main/docs/LICENSE)
+​[​Apache License 2.0](https://raw.githubusercontent.com/nicholaswilde/mcp-server/refs/heads/main/LICENSE)
 
 ## :pencil: Author
 
