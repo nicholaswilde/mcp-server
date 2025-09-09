@@ -16,6 +16,8 @@ attrs==25.3.0
     # via
     #   jsonschema
     #   referencing
+authlib==1.6.3
+    # via -r requirements.in
 babel==2.17.0
     # via mkdocs-material
 backrefs==5.9
@@ -25,6 +27,8 @@ certifi==2025.8.3
     #   httpcore
     #   httpx
     #   requests
+cffi==2.0.0
+    # via cryptography
 cfgv==3.4.0
     # via pre-commit
 charset-normalizer==3.4.3
@@ -36,6 +40,8 @@ click==8.2.1
     #   uvicorn
 colorama==0.4.6
     # via mkdocs-material
+cryptography==45.0.7
+    # via authlib
 csscompressor==0.9.5
     # via mkdocs-minify-plugin
 distlib==0.4.0
@@ -69,6 +75,8 @@ idna==3.10
     #   requests
 iniconfig==2.1.0
     # via pytest
+itsdangerous==2.2.0
+    # via -r requirements.in
 jinja2==3.1.6
     # via
     #   mkdocs
@@ -125,6 +133,8 @@ pluggy==1.6.0
     # via pytest
 pre-commit==4.3.0
     # via -r requirements.in
+pycparser==2.23
+    # via cffi
 pydantic==2.11.7
     # via
     #   fastapi

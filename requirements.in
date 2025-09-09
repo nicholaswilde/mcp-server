@@ -1,5 +1,7 @@
 fastapi
 uvicorn
+authlib
+itsdangerous
 ruff
 pre-commit
 
