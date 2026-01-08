@@ -16,7 +16,7 @@ attrs==25.3.0
     # via
     #   jsonschema
     #   referencing
-authlib==1.6.3
+authlib==1.6.6
     # via -r requirements.in
 babel==2.17.0
     # via mkdocs-material
