@@ -40,7 +40,7 @@ click==8.2.1
     #   uvicorn
 colorama==0.4.6
     # via mkdocs-material
-cryptography==45.0.7
+cryptography==46.0.5
     # via authlib
 csscompressor==0.9.5
     # via mkdocs-minify-plugin
